@@ -11,12 +11,12 @@ h1 {
 }
 
 .piece-wrapper {
-	width: 120px; /* 4 x 30px */
-	height: 60px; /* 2 x 30px */
+	/* width: 120px; /* 4 x 30px */
+	/* height: 60px; /* 2 x 30px */
 	position: absolute;
 }
 
-.piece-part {
+.piece-block {
 	width: 26px;
 	height: 26px;
 	border: 2px solid;
@@ -25,7 +25,7 @@ h1 {
 }
 
 /* O/square piece */
-.piece-o .piece-part {
+.piece-o .piece-block {
 	background: yellow;
 	border-color: olive;
 }
@@ -47,7 +47,7 @@ h1 {
 }
 
 /* L piece */
-.piece-l .piece-part {
+.piece-l .piece-block {
 	background: orange;
 	border-color: brown;
 }
@@ -69,7 +69,7 @@ h1 {
 }
 
 /* J piece */
-.piece-j .piece-part {
+.piece-j .piece-block {
 	background: blue;
 	border-color: darkblue;
 }
@@ -91,7 +91,7 @@ h1 {
 }
 
 /* S piece */
-.piece-s .piece-part {
+.piece-s .piece-block {
 	background: lime;
 	border-color: green;
 }
@@ -113,7 +113,7 @@ h1 {
 }
 
 /* Z piece */
-.piece-z .piece-part {
+.piece-z .piece-block {
 	background: red;
 	border-color: maroon;
 }
@@ -135,7 +135,7 @@ h1 {
 }
 
 /* T piece */
-.piece-t .piece-part {
+.piece-t .piece-block {
 	background: magenta;
 	border-color: purple;
 }
@@ -157,7 +157,7 @@ h1 {
 }
 
 /* I/long piece */
-.piece-i .piece-part {
+.piece-i .piece-block {
 	background: cyan;
 	border-color: darkcyan;
 }

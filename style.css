@@ -1,38 +1,48 @@
-
-.piece-wrapper {
-	width: 200px;
-	height: 100px;
-	position: relative;
-	margin: 10px;
+h1 {
+	text-align: center;
 }
 
-.piece-part {
-	width: 46px;
-	height: 46px;
-	border: 2px solid;
-	border-radius: 5px;
+#game-wrapper {
+	background: darkgray;
+	width: 300px; /* 10 * 30px */
+	height: 600px; /* 20 x 30px */
+	margin: 0 auto;
+	position: relative;
+}
+
+.piece-wrapper {
+	width: 120px; /* 4 x 30px */
+	height: 60px; /* 2 x 30px */
 	position: absolute;
 }
 
-/* o/square piece */
+.piece-part {
+	width: 26px;
+	height: 26px;
+	border: 2px solid;
+	border-radius: 2px;
+	position: absolute;
+}
+
+/* O/square piece */
 .piece-o .piece-part {
 	background: yellow;
 	border-color: olive;
 }
 .piece-o .part1 {
-	left: 50px;
+	left: 30px;
 	top: 0;
 }
 .piece-o .part2 {
-	left: 100px;
+	left: 60px;
 	top: 0;
 }
 .piece-o .part3 {
-	left: 50px;
+	left: 30px;
 	bottom: 0;
 }
 .piece-o .part4 {
-	left: 100px;
+	left: 60px;
 	bottom: 0;
 }
 
@@ -42,7 +52,7 @@
 	border-color: brown;
 }
 .piece-l .part1 {
-	right: 50px;
+	right: 30px;
 	top: 0;
 }
 .piece-l .part2 {
@@ -50,11 +60,11 @@
 	bottom: 0;
 }
 .piece-l .part3 {
-	left: 50px;
+	left: 30px;
 	bottom: 0;
 }
 .piece-l .part4 {
-	left: 100px;
+	left: 60px;
 	bottom: 0;
 }
 
@@ -72,11 +82,11 @@
 	bottom: 0;
 }
 .piece-j .part3 {
-	left: 50px;
+	left: 30px;
 	bottom: 0;
 }
 .piece-j .part4 {
-	left: 100px;
+	left: 60px;
 	bottom: 0;
 }
 
@@ -86,11 +96,11 @@
 	border-color: green;
 }
 .piece-s .part1 {
-	left: 50px;
+	left: 30px;
 	top: 0;
 }
 .piece-s .part2 {
-	left: 100px;
+	left: 60px;
 	top: 0;
 }
 .piece-s .part3 {
@@ -98,7 +108,7 @@
 	bottom: 0;
 }
 .piece-s .part4 {
-	left: 50px;
+	left: 30px;
 	bottom: 0;
 }
 
@@ -112,15 +122,15 @@
 	top: 0;
 }
 .piece-z .part2 {
-	left: 50px;
+	left: 30px;
 	top: 0;
 }
 .piece-z .part3 {
-	left: 50px;
+	left: 30px;
 	bottom: 0;
 }
 .piece-z .part4 {
-	left: 100px;
+	left: 60px;
 	bottom: 0;
 }
 
@@ -130,7 +140,7 @@
 	border-color: purple;
 }
 .piece-t .part1 {
-	left: 50px;
+	left: 30px;
 	top: 0;
 }
 .piece-t .part2 {
@@ -138,29 +148,29 @@
 	bottom: 0;
 }
 .piece-t .part3 {
-	left: 50px;
+	left: 30px;
 	bottom: 0;
 }
 .piece-t .part4 {
-	left: 100px;
+	left: 60px;
 	bottom: 0;
 }
 
-/* i/long piece */
+/* I/long piece */
 .piece-i .piece-part {
 	background: cyan;
-	border-color: gray;
+	border-color: darkcyan;
 }
 .piece-i .part1 {
 	left: 0;
 	top: 0;
 }
 .piece-i .part2 {
-	left: 50px;
+	left: 30px;
 	top: 0;
 }
 .piece-i .part3 {
-	right: 50px;
+	right: 30px;
 	top: 0;
 }
 .piece-i .part4 {

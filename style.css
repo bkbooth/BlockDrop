@@ -1,0 +1,169 @@
+
+.piece-wrapper {
+	width: 200px;
+	height: 100px;
+	position: relative;
+	margin: 10px;
+}
+
+.piece-part {
+	width: 46px;
+	height: 46px;
+	border: 2px solid;
+	border-radius: 5px;
+	position: absolute;
+}
+
+/* o/square piece */
+.piece-o .piece-part {
+	background: yellow;
+	border-color: olive;
+}
+.piece-o .part1 {
+	left: 50px;
+	top: 0;
+}
+.piece-o .part2 {
+	left: 100px;
+	top: 0;
+}
+.piece-o .part3 {
+	left: 50px;
+	bottom: 0;
+}
+.piece-o .part4 {
+	left: 100px;
+	bottom: 0;
+}
+
+/* L piece */
+.piece-l .piece-part {
+	background: orange;
+	border-color: brown;
+}
+.piece-l .part1 {
+	right: 50px;
+	top: 0;
+}
+.piece-l .part2 {
+	left: 0;
+	bottom: 0;
+}
+.piece-l .part3 {
+	left: 50px;
+	bottom: 0;
+}
+.piece-l .part4 {
+	left: 100px;
+	bottom: 0;
+}
+
+/* J piece */
+.piece-j .piece-part {
+	background: blue;
+	border-color: darkblue;
+}
+.piece-j .part1 {
+	left: 0;
+	top: 0;
+}
+.piece-j .part2 {
+	left: 0;
+	bottom: 0;
+}
+.piece-j .part3 {
+	left: 50px;
+	bottom: 0;
+}
+.piece-j .part4 {
+	left: 100px;
+	bottom: 0;
+}
+
+/* S piece */
+.piece-s .piece-part {
+	background: lime;
+	border-color: green;
+}
+.piece-s .part1 {
+	left: 50px;
+	top: 0;
+}
+.piece-s .part2 {
+	left: 100px;
+	top: 0;
+}
+.piece-s .part3 {
+	left: 0;
+	bottom: 0;
+}
+.piece-s .part4 {
+	left: 50px;
+	bottom: 0;
+}
+
+/* Z piece */
+.piece-z .piece-part {
+	background: red;
+	border-color: maroon;
+}
+.piece-z .part1 {
+	left: 0;
+	top: 0;
+}
+.piece-z .part2 {
+	left: 50px;
+	top: 0;
+}
+.piece-z .part3 {
+	left: 50px;
+	bottom: 0;
+}
+.piece-z .part4 {
+	left: 100px;
+	bottom: 0;
+}
+
+/* T piece */
+.piece-t .piece-part {
+	background: magenta;
+	border-color: purple;
+}
+.piece-t .part1 {
+	left: 50px;
+	top: 0;
+}
+.piece-t .part2 {
+	left: 0;
+	bottom: 0;
+}
+.piece-t .part3 {
+	left: 50px;
+	bottom: 0;
+}
+.piece-t .part4 {
+	left: 100px;
+	bottom: 0;
+}
+
+/* i/long piece */
+.piece-i .piece-part {
+	background: cyan;
+	border-color: gray;
+}
+.piece-i .part1 {
+	left: 0;
+	top: 0;
+}
+.piece-i .part2 {
+	left: 50px;
+	top: 0;
+}
+.piece-i .part3 {
+	right: 50px;
+	top: 0;
+}
+.piece-i .part4 {
+	right: 0;
+	top: 0;
+}

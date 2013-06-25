@@ -5,25 +5,25 @@ Tetris using HTML5/CSS3/JavaScript
 ##Shapes
 
 ````
-xx		yellow
+xx		yellow		o/square
 xx
 
-   x	orange
-xxxx
-
-x		blue
-xxxx
-
- xx		green
-xx
-
-xx		red
- xx
-
- x		purple
+  x		orange		L
 xxx
 
-xxxx	cyan
+x		blue		J
+xxx
+
+ xx		green		S
+xx
+
+xx		red			Z
+ xx
+
+ x		purple		T
+xxx
+
+xxxx	cyan		i/long
 ````
 
 ##Board Size

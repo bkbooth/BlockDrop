@@ -1,0 +1,67 @@
+h1 {
+	text-align: center;
+}
+
+#game-wrapper {
+	background: darkgray;
+	width: 300px; /* 10 * 30px */
+	height: 600px; /* 20 x 30px */
+	margin: 0 auto;
+	position: relative;
+	overflow: hidden;
+}
+
+.piece-wrapper {
+	position: absolute;
+}
+
+.piece-block {
+	box-sizing: border-box;
+	width: 30px;
+	height: 30px;
+	border: 2px solid;
+	border-radius: 3px;
+	position: absolute;
+}
+
+/* O/square piece */
+.piece-o .piece-block {
+	background: yellow;
+	border-color: olive;
+}
+
+/* L piece */
+.piece-l .piece-block {
+	background: orange;
+	border-color: brown;
+}
+
+/* J piece */
+.piece-j .piece-block {
+	background: blue;
+	border-color: darkblue;
+}
+
+/* S piece */
+.piece-s .piece-block {
+	background: lime;
+	border-color: green;
+}
+
+/* Z piece */
+.piece-z .piece-block {
+	background: red;
+	border-color: maroon;
+}
+
+/* T piece */
+.piece-t .piece-block {
+	background: magenta;
+	border-color: purple;
+}
+
+/* I/long piece */
+.piece-i .piece-block {
+	background: cyan;
+	border-color: darkcyan;
+}

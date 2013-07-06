@@ -94,13 +94,27 @@ var BlockDropGame = {
 	_intervalId: null
 };
 
-BlockDropGame.isBoundingBoxCollisionDetection = function(sourceObject, targetObject) {
+BlockDropGame.isBoundingBoxCollisionDetection = function(sourceObject, targetObject, direction) {
 	//console.log("bounding box detecting");
-	if (sourceObject.offsetTop + sourceObject.offsetHeight >= targetObject.offsetTop &&
+	//console.log("direction: " + direction);
+	if ( (typeof direction === "undefined" || direction === "down") &&
+		sourceObject.offsetTop + sourceObject.offsetHeight >= targetObject.offsetTop &&
 		sourceObject.offsetTop <= targetObject.offsetTop + targetObject.offsetHeight &&
 		sourceObject.offsetLeft + sourceObject.offsetWidth > targetObject.offsetLeft &&
 		sourceObject.offsetLeft < targetObject.offsetLeft + targetObject.offsetWidth) {
 		return true;
+	} else if ( (direction === "left" || direction === "right") &&
+		sourceObject.offsetLeft <= targetObject.offsetLeft + targetObject.offsetWidth &&
+		sourceObject.offsetLeft + sourceObject.offsetWidth >= targetObject.offsetLeft &&
+		sourceObject.offsetTop + sourceObject.offsetHeight >= targetObject.offsetTop &&
+		sourceObject.offsetTop <= targetObject.offsetTop + targetObject.offsetHeight) {
+		return true;
+	/* } else if (direction === "right" &&
+		sourceObject.offsetLeft + sourceObject.offsetWidth >= targetObject.offsetLeft &&
+		sourceObject.offsetLeft <= targetObject.offsetLeft + targetObject.offsetWidth &&
+		sourceObject.offsetTop + sourceObject.offsetHeight > targetObject.offsetTop &&
+		sourceObject.offsetTop < targetObject.offsetTop + targetObject.offsetHeight) {
+		return true; */
 	} else {
 		return false;
 	}
@@ -118,8 +132,8 @@ BlockDropGame.crudeCollisionDetection = function(object) {
 
 	return possibleCollisions;
 };
-BlockDropGame.precisionCollisionDetection = function(object, possibleCollisions) {
-	console.log("precision detecting "+possibleCollisions.length);
+BlockDropGame.precisionCollisionDetection = function(object, possibleCollisions, direction) {
+	//console.log("precision detecting "+possibleCollisions.length);
 	var i, j, k, allPCBlocks = null, objectBlocks = null;
 	for (i = 0; i < possibleCollisions.length; i++) {
 		allPCBlocks = possibleCollisions[i].getElementsByClassName("piece-block");
@@ -142,7 +156,7 @@ BlockDropGame.precisionCollisionDetection = function(object, possibleCollisions)
 					offsetTop: possibleCollisions[i].offsetTop + allPCBlocks[j].offsetTop,
 					offsetWidth: allPCBlocks[j].offsetWidth,
 					offsetHeight: allPCBlocks[j].offsetHeight
-				})) {
+				}, direction)) {
 					/* console.log("collision found. src.left: "+objectBlocks[k].offsetLeft+", src.top: "+objectBlocks[k].offsetTop+
 						", trgt.left: "+allPCBlocks[j].offsetLeft+", trgt.top"+allPCBlocks[j].offsetTop); */
 					return true;
@@ -153,7 +167,7 @@ BlockDropGame.precisionCollisionDetection = function(object, possibleCollisions)
 	}
 	return false;
 };
-BlockDropGame.checkBoundingBox = function(object, target) {
+BlockDropGame.checkBoundingBox = function(object, target, direction) {
 	var objectBlocks = object.getElementsByClassName("piece-block");
 	switch (target) {
 		case 'leftWall':
@@ -182,7 +196,7 @@ BlockDropGame.checkBoundingBox = function(object, target) {
 		case 'otherPieces':
 			var possibleCollisions = BlockDropGame.crudeCollisionDetection(object);
 			//console.log("possible collisions: "+possibleCollisions.length);
-			if (possibleCollisions.length > 0 && BlockDropGame.precisionCollisionDetection(object, possibleCollisions)) {
+			if (possibleCollisions.length > 0 && BlockDropGame.precisionCollisionDetection(object, possibleCollisions, direction)) {
 				return false;
 			}
 			break;
@@ -192,21 +206,21 @@ BlockDropGame.checkBoundingBox = function(object, target) {
 
 BlockDropGame.canMoveLeft = function() {
 	if (BlockDropGame.checkBoundingBox(BlockDropGame.piece, 'leftWall') &&
-		BlockDropGame.checkBoundingBox(BlockDropGame.piece, 'otherPieces')) {
+		BlockDropGame.checkBoundingBox(BlockDropGame.piece, 'otherPieces', 'left')) {
 		return true;
 	}
 	return false;
 };
 BlockDropGame.canMoveRight = function() {
 	if (BlockDropGame.checkBoundingBox(BlockDropGame.piece, 'rightWall') &&
-		BlockDropGame.checkBoundingBox(BlockDropGame.piece, 'otherPieces')) {
+		BlockDropGame.checkBoundingBox(BlockDropGame.piece, 'otherPieces', 'right')) {
 		return true;
 	}
 	return false;
 };
 BlockDropGame.canMoveDown = function() {
 	if (BlockDropGame.checkBoundingBox(BlockDropGame.piece, 'bottomWall') &&
-		BlockDropGame.checkBoundingBox(BlockDropGame.piece, 'otherPieces')) {
+		BlockDropGame.checkBoundingBox(BlockDropGame.piece, 'otherPieces', 'down')) {
 		return true;
 	}
 	return false;

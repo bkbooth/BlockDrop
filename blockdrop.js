@@ -4,7 +4,7 @@
  * bkbooth at gmail dot com
  */
 
-var gridSize = 30;
+var gridSize = 30;		// Make this variable rather than fixed
 
 var PieceFactory = {
 	// Define our pieces here
@@ -94,55 +94,55 @@ var BlockDropGame = {
 	_intervalId: null
 };
 
-BlockDropGame.isBoundingBoxCollisionDetection = function(sourceObject, targetObject, direction) {
+// Simple bounding box check, used for both crude and precision checks
+BlockDropGame.isBoxIntersecting = function(sourceObject, targetObject, sourceOffsets) {
 	//console.log("bounding box detecting");
 	//console.log("direction: " + direction);
-	if ( (typeof direction === "undefined" || direction === "down") &&
-		sourceObject.offsetTop + sourceObject.offsetHeight >= targetObject.offsetTop &&
-		sourceObject.offsetTop <= targetObject.offsetTop + targetObject.offsetHeight &&
-		sourceObject.offsetLeft + sourceObject.offsetWidth > targetObject.offsetLeft &&
-		sourceObject.offsetLeft < targetObject.offsetLeft + targetObject.offsetWidth) {
+	if (sourceObject.offsetTop + sourceObject.offsetHeight + sourceOffsets.top > targetObject.offsetTop &&		// source.bottom >= target.top
+		sourceObject.offsetTop + sourceOffsets.top < targetObject.offsetTop + targetObject.offsetHeight &&		// source.top <= target.bottom
+		sourceObject.offsetLeft + sourceObject.offsetWidth + sourceOffsets.left > targetObject.offsetLeft &&	// source.right >= target.left
+		sourceObject.offsetLeft + sourceOffsets.left < targetObject.offsetLeft + targetObject.offsetWidth) {	// source.left <= target.right
 		return true;
-	} else if ( (direction === "left" || direction === "right") &&
-		sourceObject.offsetLeft <= targetObject.offsetLeft + targetObject.offsetWidth &&
-		sourceObject.offsetLeft + sourceObject.offsetWidth >= targetObject.offsetLeft &&
-		sourceObject.offsetTop + sourceObject.offsetHeight >= targetObject.offsetTop &&
-		sourceObject.offsetTop <= targetObject.offsetTop + targetObject.offsetHeight) {
-		return true;
-	/* } else if (direction === "right" &&
-		sourceObject.offsetLeft + sourceObject.offsetWidth >= targetObject.offsetLeft &&
-		sourceObject.offsetLeft <= targetObject.offsetLeft + targetObject.offsetWidth &&
-		sourceObject.offsetTop + sourceObject.offsetHeight > targetObject.offsetTop &&
-		sourceObject.offsetTop < targetObject.offsetTop + targetObject.offsetHeight) {
-		return true; */
 	} else {
 		return false;
 	}
 };
-BlockDropGame.crudeCollisionDetection = function(object) {
-	var allPieces = document.getElementById("game-wrapper").getElementsByClassName("piece-wrapper");
+// Crude piece-by-piece check to find nearby pieces
+// saves needing to do a box-by-box check on every piece
+BlockDropGame.getNearbyPieces = function(object, offsets) {
 	//console.log("crude detecting "+allPieces.length);
-	var possibleCollisions = [];
 	
+	// Get all pieces from the game board and initialise array of nearby pieces
+	var allPieces = document.getElementById("game-wrapper").getElementsByClassName("piece-wrapper");
+	var nearbyPieces = [];
+	
+	// Loop through each piece, check it's not the current piece and then do a bounding box check
 	for (var i = 0; i < allPieces.length; i++) {
-		if (allPieces[i] !== object && BlockDropGame.isBoundingBoxCollisionDetection(object, allPieces[i])) {
-			possibleCollisions.push(allPieces[i]);
+		if (allPieces[i] !== object && BlockDropGame.isBoxIntersecting(object, allPieces[i], offsets)) {
+			nearbyPieces.push(allPieces[i]);
 		}
 	}
 
-	return possibleCollisions;
+	return nearbyPieces;
 };
-BlockDropGame.precisionCollisionDetection = function(object, possibleCollisions, direction) {
-	//console.log("precision detecting "+possibleCollisions.length);
-	var i, j, k, allPCBlocks = null, objectBlocks = null;
-	for (i = 0; i < possibleCollisions.length; i++) {
-		allPCBlocks = possibleCollisions[i].getElementsByClassName("piece-block");
-		//console.log(i+" has "+allPCBlocks.length+" blocks");
-		for (j = 0; j < allPCBlocks.length; j++) {
-			objectBlocks = object.getElementsByClassName("piece-block");
+// Go through all nearby pieces and compare each block to each of
+// the current pieces blocks
+BlockDropGame.checkAllNearbyPieces = function(object, nearbyPieces, offsets) {
+	//console.log("precision detecting "+nearbyPieces.length);
+	
+	// Initialise some variables
+	var i, j, k, allNPBlocks = null, objectBlocks = object.getElementsByClassName("piece-block");
+	
+	for (i = 0; i < nearbyPieces.length; i++) {
+		// Loop through all nearby piece, get its blocks
+		allNPBlocks = nearbyPieces[i].getElementsByClassName("piece-block");
+		//console.log(i+" has "+allNPBlocks.length+" blocks");
+		for (j = 0; j < allNPBlocks.length; j++) {
+			// Loop through all blocks of the nearby pieces
 			for (k = 0; k < objectBlocks.length; k++) {
-				//console.log("inner most loop "+objectBlocks[k].offsetLeft+" "+allPCBlocks[j].offsetLeft);
-				if (BlockDropGame.isBoundingBoxCollisionDetection({
+				// Loop through all blocks of the current piece, do a bounding box check
+				//console.log("inner most loop "+objectBlocks[k].offsetLeft+" "+allNPBlocks[j].offsetLeft);
+				if (BlockDropGame.isBoxIntersecting({
 					// need to create a new source object accounting for parent offsets
 					// there must be a better way?
 					offsetLeft: object.offsetLeft + objectBlocks[k].offsetLeft,
@@ -152,13 +152,13 @@ BlockDropGame.precisionCollisionDetection = function(object, possibleCollisions,
 				}, {
 					// need to create a new target object accounting for parent offsets
 					// there must be a better way?
-					offsetLeft: possibleCollisions[i].offsetLeft + allPCBlocks[j].offsetLeft,
-					offsetTop: possibleCollisions[i].offsetTop + allPCBlocks[j].offsetTop,
-					offsetWidth: allPCBlocks[j].offsetWidth,
-					offsetHeight: allPCBlocks[j].offsetHeight
-				}, direction)) {
+					offsetLeft: nearbyPieces[i].offsetLeft + allNPBlocks[j].offsetLeft,
+					offsetTop: nearbyPieces[i].offsetTop + allNPBlocks[j].offsetTop,
+					offsetWidth: allNPBlocks[j].offsetWidth,
+					offsetHeight: allNPBlocks[j].offsetHeight
+				}, offsets)) {
 					/* console.log("collision found. src.left: "+objectBlocks[k].offsetLeft+", src.top: "+objectBlocks[k].offsetTop+
-						", trgt.left: "+allPCBlocks[j].offsetLeft+", trgt.top"+allPCBlocks[j].offsetTop); */
+						", trgt.left: "+allNPBlocks[j].offsetLeft+", trgt.top"+allNPBlocks[j].offsetTop); */
 					return true;
 				}
 				//console.log("no collision");
@@ -167,66 +167,116 @@ BlockDropGame.precisionCollisionDetection = function(object, possibleCollisions,
 	}
 	return false;
 };
-BlockDropGame.checkBoundingBox = function(object, target, direction) {
+// Is the current piece intersecting with any walls or other pieces?
+BlockDropGame.isIntersecting = function(object, target, offsets) {
 	var objectBlocks = object.getElementsByClassName("piece-block");
 	switch (target) {
 		case 'leftWall':
 			for (var i = 0; i < objectBlocks.length; i++) {
 				//console.log(objectBlocks[i].offsetLeft + object.leftVal);
-				if (object.leftVal + objectBlocks[i].offsetLeft <= 0) {
-					return false;
+				if (object.offsetLeft + objectBlocks[i].offsetLeft + offsets.left < 0) {
+					//console.log("left wall collision");
+					return true;
 				}
 			}
 			break;
 		case 'rightWall':
 			for (var i = 0; i < objectBlocks.length; i++) {
 				//console.log(objectBlocks[i].offsetLeft + object.leftVal);
-				if (object.leftVal + objectBlocks[i].offsetLeft + objectBlocks[i].offsetWidth >= gridSize * 10) {
-					return false;
+				if (object.offsetLeft + objectBlocks[i].offsetLeft + objectBlocks[i].offsetWidth + offsets.left > gridSize * 10) {
+					//console.log("right wall collision");
+					return true;
 				}
 			}
 			break;
 		case 'bottomWall':
 			for (var i = 0; i < objectBlocks.length; i++) {
-				if (object.topVal + objectBlocks[i].offsetTop + objectBlocks[i].offsetHeight >= gridSize * 20) {
-					return false;
+				if (object.offsetTop + objectBlocks[i].offsetTop + objectBlocks[i].offsetHeight + offsets.top > gridSize * 20) {
+					//console.log("bottom wall collision");
+					return true;
 				}
 			}
 			break;
-		case 'otherPieces':
-			var possibleCollisions = BlockDropGame.crudeCollisionDetection(object);
-			//console.log("possible collisions: "+possibleCollisions.length);
-			if (possibleCollisions.length > 0 && BlockDropGame.precisionCollisionDetection(object, possibleCollisions, direction)) {
-				return false;
-			}
-			break;
+		default:
+			// no default case
 	}
-	return true;
+	
+	// Originally had an "otherPieces" target check, but we always need to check other pieces
+	var nearbyPieces = BlockDropGame.getNearbyPieces(object, offsets);
+	//console.log("possible collisions: "+possibleCollisions.length);
+	if (nearbyPieces.length > 0 && BlockDropGame.checkAllNearbyPieces(object, nearbyPieces, offsets)) {
+		//console.log("other piece collision");
+		return true;
+	}
+	
+	return false;
 };
 
 BlockDropGame.canMoveLeft = function() {
-	if (BlockDropGame.checkBoundingBox(BlockDropGame.piece, 'leftWall') &&
-		BlockDropGame.checkBoundingBox(BlockDropGame.piece, 'otherPieces', 'left')) {
-		return true;
+	var offsets = {
+		top: 0,
+		left: -gridSize
+	};
+	if (BlockDropGame.isIntersecting(BlockDropGame.piece, 'leftWall', offsets)) {
+		return false;
 	}
-	return false;
+	return true;
 };
 BlockDropGame.canMoveRight = function() {
-	if (BlockDropGame.checkBoundingBox(BlockDropGame.piece, 'rightWall') &&
-		BlockDropGame.checkBoundingBox(BlockDropGame.piece, 'otherPieces', 'right')) {
-		return true;
+	var offsets = {
+		top: 0,
+		left: gridSize
+	};
+	if (BlockDropGame.isIntersecting(BlockDropGame.piece, 'rightWall', offsets)) {
+		return false;
 	}
-	return false;
+	return true;
 };
 BlockDropGame.canMoveDown = function() {
-	if (BlockDropGame.checkBoundingBox(BlockDropGame.piece, 'bottomWall') &&
-		BlockDropGame.checkBoundingBox(BlockDropGame.piece, 'otherPieces', 'down')) {
-		return true;
+	var offsets = {
+		top: gridSize,
+		left: 0
+	};
+	if (BlockDropGame.isIntersecting(BlockDropGame.piece, 'bottomWall', offsets)) {
+		return false;
 	}
-	return false;
+	return true;
+};
+BlockDropGame.canRotate = function() {
+	return true;
+};
+
+BlockDropGame.findCompleteRows = function() {
+	var i, j, k, allPiecesBlocks, completeRows = [];
+	//var allPieces = document.getElementById("game-wrapper").getElementsByClassName("piece-wrapper");
+	var allBlocks = document.getElementById("game-wrapper").getElementsByClassName("piece-block");
+	// Check 20 rows from the bottom up
+	for (i = 19; i >= 0; i--) {
+		for (j = 0; j < 10; j++) {
+			var foundBlock = false;
+			for (k = 0; k < allBlocks.length && !foundBlock; k++) {
+				if (allBlocks[k].offsetTop + allBlocks[k].parentNode.offsetTop == i * gridSize &&
+					allBlocks[k].offsetLeft + allBlocks[k].parentNode.offsetLeft == j * gridSize) {
+					foundBlock = true;
+				}
+			}
+			if (!foundBlock) {
+				break;
+			}
+		}
+		if (j == 9) {
+			completeRows.push(i);
+		}
+	}
+	return completeRows;
 };
 
 BlockDropGame.update = function() {
+	/* var completeRows = BlockDropGame.findCompleteRows();
+	if (completeRows.length > 0) {
+		console.log("complete rows: " + completeRows.length);
+	} */
+	
 	if (BlockDropGame.canMoveDown()) {
 		BlockDropGame.piece.topVal += gridSize;
 	} else {
@@ -274,11 +324,13 @@ window.addEventListener("keydown", function(event) {
 	} else if (keyPressed == '38' || keyPressed == '87') {
 		// up key or 'w'
 		//console.log("up");
-		BlockDropGame.piece.rotate += 90;
-		if (BlockDropGame.piece.rotate >= 360) {
-			BlockDropGame.piece.rotate = 0;
+		if (BlockDropGame.canRotate()) {
+			BlockDropGame.piece.rotate += 90;
+			if (BlockDropGame.piece.rotate >= 360) {
+				BlockDropGame.piece.rotate = 0;
+			}
 		}
-		
+
 		var blocks = BlockDropGame.piece.getElementsByClassName("piece-block");
 		for (var i = 0; i < blocks.length; i++) {
 			blocks[i].style.left = BlockDropGame.piece.blocksMap["rot"+BlockDropGame.piece.rotate][i].left * gridSize + "px";

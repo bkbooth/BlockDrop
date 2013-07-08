@@ -19,49 +19,56 @@ h1 {
 	box-sizing: border-box;
 	width: 30px;
 	height: 30px;
-	border: 2px solid;
+	border: 4px outset;
 	border-radius: 3px;
 	position: absolute;
 }
 
 /* O/square piece */
-.piece-o .piece-block {
-	background: yellow;
-	border-color: olive;
+.piece-o.piece-block {
+	/* yellow */
+	background: #e4de00;
+	border-color: #bdb700;
 }
 
 /* L piece */
-.piece-l .piece-block {
-	background: orange;
-	border-color: brown;
+.piece-l.piece-block {
+	/* orange */
+	background: #e46200;
+	border-color: #bd4e00;
 }
 
 /* J piece */
-.piece-j .piece-block {
-	background: blue;
-	border-color: darkblue;
+.piece-j.piece-block {
+	/* blue */
+	background: #004ee4;
+	border-color: #0041bd;
 }
 
 /* S piece */
-.piece-s .piece-block {
-	background: lime;
-	border-color: green;
+.piece-s.piece-block {
+	/* green */
+	background: #00e427;
+	border-color: #00aa20;
 }
 
 /* Z piece */
-.piece-z .piece-block {
-	background: red;
-	border-color: maroon;
+.piece-z.piece-block {
+	/* red */
+	background: #e40027;
+	border-color: #b00020;
 }
 
 /* T piece */
-.piece-t .piece-block {
-	background: magenta;
-	border-color: purple;
+.piece-t.piece-block {
+	/* purple */
+	background: #9c13e4;
+	border-color: #8200bd;
 }
 
 /* I/long piece */
-.piece-i .piece-block {
-	background: cyan;
-	border-color: darkcyan;
+.piece-i.piece-block {
+	/* cyan */
+	background: #00e4e4;
+	border-color: #00bdbd;
 }

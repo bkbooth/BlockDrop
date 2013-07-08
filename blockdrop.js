@@ -4,7 +4,10 @@
  * bkbooth at gmail dot com
  */
 
+// Need to refactor all of the code into a closure.
+
 var gridSize = 30;		// Make this variable rather than fixed
+var gameWrapper = document.getElementById("game-wrapper");
 
 var PieceFactory = {
 	// Define our pieces here
@@ -60,13 +63,17 @@ var PieceFactory = {
 		// Create and setup the wrapper div for the piece
 		// Place some of 
 		var newPiece = document.createElement("div");
-		newPiece.className = "piece-wrapper piece-" + pieceBlueprint.id;
+		newPiece.className = "piece-wrapper";
+		
+		// Add these useful properties to the piece,
+		// can probably remove most of them now
 		newPiece.pieceSize = pieceBlueprint.size;
 		newPiece.blocksMap = pieceBlueprint.blocks;
 		newPiece.topVal = -gridSize;
 		newPiece.leftVal = gridSize * (5 - (Math.round(pieceBlueprint.size / 2)));
 		newPiece.rotate = 0;
 		
+		// Size & position of the new piece
 		newPiece.style.top = newPiece.topVal + "px";
 		newPiece.style.left = newPiece.leftVal + "px"
 		newPiece.style.width = gridSize * pieceBlueprint.size + "px";
@@ -76,7 +83,7 @@ var PieceFactory = {
 		pieceBlueprint.blocks["rot0"].forEach(function(offsets) {
 			// Create and setup the block for the piece
 			var block = document.createElement("div");
-			block.className = "piece-block";
+			block.className = "piece-block piece-" + pieceBlueprint.id;
 			block.style.left = gridSize * offsets.left + "px";
 			block.style.top = gridSize * offsets.top + "px";
 			
@@ -85,7 +92,7 @@ var PieceFactory = {
 		});
 		
 		// Append the piece to the TetrisGame board and return it
-		return document.getElementById("game-wrapper").appendChild(newPiece);
+		return gameWrapper.appendChild(newPiece);
 	}
 };
 
@@ -107,71 +114,50 @@ BlockDropGame.isBoxIntersecting = function(sourceObject, targetObject, sourceOff
 		return false;
 	}
 };
-// Crude piece-by-piece check to find nearby pieces
-// saves needing to do a box-by-box check on every piece
-BlockDropGame.getNearbyPieces = function(object, offsets) {
-	//console.log("crude detecting "+allPieces.length);
-	
-	// Get all pieces from the game board and initialise array of nearby pieces
-	var allPieces = document.getElementById("game-wrapper").getElementsByClassName("piece-wrapper");
-	var nearbyPieces = [];
-	
-	// Loop through each piece, check it's not the current piece and then do a bounding box check
-	for (var i = 0; i < allPieces.length; i++) {
-		if (allPieces[i] !== object && BlockDropGame.isBoxIntersecting(object, allPieces[i], offsets)) {
-			nearbyPieces.push(allPieces[i]);
-		}
-	}
 
-	return nearbyPieces;
-};
-// Go through all nearby pieces and compare each block to each of
-// the current pieces blocks
-BlockDropGame.checkAllNearbyPieces = function(object, nearbyPieces, offsets) {
+// Compare the blocks of the current piece to all other blocks on the game board
+BlockDropGame.checkAllBlocks = function(object, offsets) {
 	//console.log("precision detecting "+nearbyPieces.length);
 	
 	// Initialise some variables
-	var i, j, k, allNPBlocks = null, objectBlocks = object.getElementsByClassName("piece-block");
+	var i, j, allBlocks = gameWrapper.getElementsByClassName("piece-block"), objectBlocks = object.getElementsByClassName("piece-block");
 	
-	for (i = 0; i < nearbyPieces.length; i++) {
-		// Loop through all nearby piece, get its blocks
-		allNPBlocks = nearbyPieces[i].getElementsByClassName("piece-block");
-		//console.log(i+" has "+allNPBlocks.length+" blocks");
-		for (j = 0; j < allNPBlocks.length; j++) {
-			// Loop through all blocks of the nearby pieces
-			for (k = 0; k < objectBlocks.length; k++) {
-				// Loop through all blocks of the current piece, do a bounding box check
+	// Loop through all blocks on the game board
+	for (i = 0; i < allBlocks.length; i++) {
+		// Ignore blocks from the current piece
+		if (allBlocks[i].parentNode !== object) {
+			// Loop through all blocks of the current piece
+			for (j = 0; j < objectBlocks.length; j++) {
 				//console.log("inner most loop "+objectBlocks[k].offsetLeft+" "+allNPBlocks[j].offsetLeft);
+				// Do a simple box collision check
 				if (BlockDropGame.isBoxIntersecting({
 					// need to create a new source object accounting for parent offsets
-					// there must be a better way?
-					offsetLeft: object.offsetLeft + objectBlocks[k].offsetLeft,
-					offsetTop: object.offsetTop + objectBlocks[k].offsetTop,
-					offsetWidth: objectBlocks[k].offsetWidth,
-					offsetHeight: objectBlocks[k].offsetHeight 
-				}, {
-					// need to create a new target object accounting for parent offsets
-					// there must be a better way?
-					offsetLeft: nearbyPieces[i].offsetLeft + allNPBlocks[j].offsetLeft,
-					offsetTop: nearbyPieces[i].offsetTop + allNPBlocks[j].offsetTop,
-					offsetWidth: allNPBlocks[j].offsetWidth,
-					offsetHeight: allNPBlocks[j].offsetHeight
-				}, offsets)) {
-					/* console.log("collision found. src.left: "+objectBlocks[k].offsetLeft+", src.top: "+objectBlocks[k].offsetTop+
-						", trgt.left: "+allNPBlocks[j].offsetLeft+", trgt.top"+allNPBlocks[j].offsetTop); */
+					// maybe there's a better way?
+					offsetLeft: object.offsetLeft + objectBlocks[j].offsetLeft,
+					offsetTop: object.offsetTop + objectBlocks[j].offsetTop,
+					offsetWidth: objectBlocks[j].offsetWidth,
+					offsetHeight: objectBlocks[j].offsetHeight
+				}, allBlocks[i], offsets)) {
+					// console.log("collision found. src.left: "+objectBlocks[k].offsetLeft+", src.top: "+objectBlocks[k].offsetTop+
+					//	", trgt.left: "+allNPBlocks[j].offsetLeft+", trgt.top"+allNPBlocks[j].offsetTop);
 					return true;
 				}
-				//console.log("no collision");
 			}
 		}
 	}
+
 	return false;
 };
+
 // Is the current piece intersecting with any walls or other pieces?
 BlockDropGame.isIntersecting = function(object, target, offsets) {
+	
+	// Get the blocks of the current piece
 	var objectBlocks = object.getElementsByClassName("piece-block");
+	
 	switch (target) {
 		case 'leftWall':
+			// Check if any of the piece blocks will be outside the left wall
 			for (var i = 0; i < objectBlocks.length; i++) {
 				//console.log(objectBlocks[i].offsetLeft + object.leftVal);
 				if (object.offsetLeft + objectBlocks[i].offsetLeft + offsets.left < 0) {
@@ -181,6 +167,7 @@ BlockDropGame.isIntersecting = function(object, target, offsets) {
 			}
 			break;
 		case 'rightWall':
+			// Check if any of the piece blocks will be outside the right wall
 			for (var i = 0; i < objectBlocks.length; i++) {
 				//console.log(objectBlocks[i].offsetLeft + object.leftVal);
 				if (object.offsetLeft + objectBlocks[i].offsetLeft + objectBlocks[i].offsetWidth + offsets.left > gridSize * 10) {
@@ -190,6 +177,7 @@ BlockDropGame.isIntersecting = function(object, target, offsets) {
 			}
 			break;
 		case 'bottomWall':
+			// Check if any of the piece blocks will be outside the bottom wall
 			for (var i = 0; i < objectBlocks.length; i++) {
 				if (object.offsetTop + objectBlocks[i].offsetTop + objectBlocks[i].offsetHeight + offsets.top > gridSize * 20) {
 					//console.log("bottom wall collision");
@@ -201,10 +189,8 @@ BlockDropGame.isIntersecting = function(object, target, offsets) {
 			// no default case
 	}
 	
-	// Originally had an "otherPieces" target check, but we always need to check other pieces
-	var nearbyPieces = BlockDropGame.getNearbyPieces(object, offsets);
-	//console.log("possible collisions: "+possibleCollisions.length);
-	if (nearbyPieces.length > 0 && BlockDropGame.checkAllNearbyPieces(object, nearbyPieces, offsets)) {
+	// Originally had this as another case, but we always want to compare to other blocks
+	if (BlockDropGame.checkAllBlocks(object, offsets)) {
 		//console.log("other piece collision");
 		return true;
 	}
@@ -212,7 +198,9 @@ BlockDropGame.isIntersecting = function(object, target, offsets) {
 	return false;
 };
 
+// Check if moving left will cause a collision with the left wall or other blocks
 BlockDropGame.canMoveLeft = function() {
+	// Offset 1 space to the left
 	var offsets = {
 		top: 0,
 		left: -gridSize
@@ -222,7 +210,10 @@ BlockDropGame.canMoveLeft = function() {
 	}
 	return true;
 };
+
+// Check if moving right will cause a collision with the right wall or other blocks
 BlockDropGame.canMoveRight = function() {
+	// Offset 1 space to the right
 	var offsets = {
 		top: 0,
 		left: gridSize
@@ -232,7 +223,10 @@ BlockDropGame.canMoveRight = function() {
 	}
 	return true;
 };
+
+// Check if moving down will cause a collision with the bottom wall or other blocks
 BlockDropGame.canMoveDown = function() {
+	// Offset 1 space down
 	var offsets = {
 		top: gridSize,
 		left: 0
@@ -242,60 +236,170 @@ BlockDropGame.canMoveDown = function() {
 	}
 	return true;
 };
+
+// Check if rotating will cause a collision with other pieces
+// We always want to allow rotation against a wall, will simply adjust position after rotate
 BlockDropGame.canRotate = function() {
+	
+	// Set the next rotation step
+	var tempPiece, tempRotate = BlockDropGame.piece.rotate + 90;
+	if (tempRotate >= 360) {
+		tempRotate = 0;
+	}
+	
+	// Create a temporary piece with the next rotation step
+	tempPiece = document.createElement("div");
+	tempPiece.className = "piece-wrapper";
+	tempPiece.style.left = BlockDropGame.piece.offsetLeft + "px";
+	tempPiece.style.top = BlockDropGame.piece.offsetTop + "px";
+	
+	// Add the blocks for the next rotation step
+	BlockDropGame.piece.blocksMap["rot"+tempRotate].forEach(function(offsets) {
+		var tempBlock = document.createElement("div");
+		tempBlock.className = "piece-block";
+		tempBlock.style.left = gridSize * offsets.left + "px";
+		tempBlock.style.top = gridSize * offsets.left + "px";
+		tempPiece.appendChild(tempBlock);
+	});
+	
+	// Intersection test with no offsets
+	if (BlockDropGame.isIntersecting(tempPiece, 'leftWall', {left: 0, top: 0})) {
+		return false;
+	}
+	
 	return true;
 };
 
+// Create and return a list of rows which are full of blocks
 BlockDropGame.findCompleteRows = function() {
-	var i, j, k, allPiecesBlocks, completeRows = [];
-	//var allPieces = document.getElementById("game-wrapper").getElementsByClassName("piece-wrapper");
-	var allBlocks = document.getElementById("game-wrapper").getElementsByClassName("piece-block");
+	// Initialise variables, get all of the blocks in the game
+	var i, j, k, completeRows = [];
+	var allBlocks = gameWrapper.getElementsByClassName("piece-block");
+	
 	// Check 20 rows from the bottom up
 	for (i = 19; i >= 0; i--) {
+		// Check 10 columns from left to right
 		for (j = 0; j < 10; j++) {
-			var foundBlock = false;
-			for (k = 0; k < allBlocks.length && !foundBlock; k++) {
-				if (allBlocks[k].offsetTop + allBlocks[k].parentNode.offsetTop == i * gridSize &&
-					allBlocks[k].offsetLeft + allBlocks[k].parentNode.offsetLeft == j * gridSize) {
-					foundBlock = true;
+			// Check all blocks in the game board
+			for (k = 0; k < allBlocks.length; k++) {
+				// If we find a block at this row and column we can exit early
+				if (allBlocks[k].offsetTop === i * gridSize &&
+					allBlocks[k].offsetLeft === j * gridSize) {
+					break;
 				}
 			}
-			if (!foundBlock) {
+			// If we didn't exit blocks loop early, a matching block wasn't found
+			// We can end this column loop
+			if (k === allBlocks.length) {
 				break;
 			}
 		}
-		if (j == 9) {
+		// If we didn't exit the column loop early, this row is full
+		if (j === 10) {
 			completeRows.push(i);
 		}
 	}
+	
+	//console.log("complete rows: "+completeRows.length);
 	return completeRows;
 };
 
-BlockDropGame.update = function() {
-	/* var completeRows = BlockDropGame.findCompleteRows();
-	if (completeRows.length > 0) {
-		console.log("complete rows: " + completeRows.length);
-	} */
+// Clear a single complete row and drop all blocks above it a single line
+BlockDropGame.clearCompleteRow = function(completeRow) {
 	
+	// Initialise some variables
+	var i, allBlocks = gameWrapper.getElementsByClassName("piece-block");
+	var blocksToRemove = [];
+	
+	//console.log("clearing row: "+completeRow);
+	
+	// Loop through all blocks on the game board
+	for (i = 0; i < allBlocks.length; i++) {
+		if (allBlocks[i].offsetTop === completeRow * gridSize) {
+			// If the block is in this row, push it to be removed
+			// directly removing here breaks the loop
+			blocksToRemove.push(allBlocks[i]);
+			//allBlocks[i].parentNode.removeChild(allBlocks[i]);
+		} else if (allBlocks[i].offsetTop < completeRow * gridSize) {
+			// If the block is above the row being removed, drop it 1 space
+			allBlocks[i].style.top = (allBlocks[i].offsetTop + gridSize) + "px";
+		}
+	}
+	
+	// Now lets go through and remove all the blocks in the row
+	for (i = 0; i < blocksToRemove.length; i++) {
+		blocksToRemove[i].parentNode.removeChild(blocksToRemove[i]);
+	}
+}
+
+// Remove the piece wrapper and leave just the blocks behind
+// This makes it much easier to detect and remove completed rows
+BlockDropGame.addCurrentPieceToBoard = function() {
+	
+	// Initialise some variables
+	var i, newLeft, newTop, newBlock;
+	var pieceBlocks = BlockDropGame.piece.getElementsByClassName("piece-block");
+	var pieceBlocksLength = pieceBlocks.length; // the length changes as we remove blocks
+	
+	// Loop through each of the blocks in the piece
+	for (var i = 0; i < pieceBlocksLength; i++) {
+		// Get new left and top relative to the game board
+		newLeft = BlockDropGame.piece.offsetLeft + pieceBlocks[0].offsetLeft;
+		newTop = BlockDropGame.piece.offsetTop + pieceBlocks[0].offsetTop;
+		
+		// Remove the block from the piece and update it's position
+		newBlock = BlockDropGame.piece.removeChild(pieceBlocks[0]);
+		newBlock.style.left = newLeft + "px";
+		newBlock.style.top = newTop + "px";
+		
+		// Add the block back in as a child of the game board
+		gameWrapper.appendChild(newBlock);
+	}
+	
+	// Remove the now empty piece from the board
+	gameWrapper.removeChild(BlockDropGame.piece);
+};
+
+// Automatically drop the current piece if possible
+// otherwise check for completed rows and then generate a new piece
+BlockDropGame.update = function() {
 	if (BlockDropGame.canMoveDown()) {
 		BlockDropGame.piece.topVal += gridSize;
 	} else {
 		clearInterval(BlockDropGame._intervalId);
+		
+		BlockDropGame.addCurrentPieceToBoard();
+		
+		var completeRows = BlockDropGame.findCompleteRows();
+		for (var i = completeRows.length; i > 0; i--) {
+			// Starting from the end of the array (highest complete row)
+			// because when you clear the lower rows first the value
+			// of the higher rows to clear would need to drop too
+			BlockDropGame.clearCompleteRow(completeRows[i - 1]);
+		}
+
+		// Create a new piece and restart the timer
 		BlockDropGame.piece = PieceFactory.create();
 		BlockDropGame._intervalId = setInterval(BlockDropGame.run, 1000 / BlockDropGame.fps);
 	}
 };
+
+// Ideally all style-related changes to the blocks should happen here.
 BlockDropGame.draw = function() {
 	BlockDropGame.piece.style.left = BlockDropGame.piece.leftVal + "px";
 	BlockDropGame.piece.style.top = BlockDropGame.piece.topVal + "px";
 	
 	//console.log("left: "+BlockDropGame.piece.offsetLeft+", top: "+BlockDropGame.piece.offsetTop+", width: "+BlockDropGame.piece.offsetWidth+", height: "+BlockDropGame.piece.offsetHeight);
 };
+
+// The loop function, update the board, draw any changes
 BlockDropGame.run = function() {
 	//console.log("running!");
 	BlockDropGame.update();
 	BlockDropGame.draw();
 }
+
+// Initialise a game, create an initial piece and start the timer
 BlockDropGame.init = function() {
 	BlockDropGame.piece = PieceFactory.create();
 	
@@ -331,8 +435,10 @@ window.addEventListener("keydown", function(event) {
 			}
 		}
 
+		// Loop through the blocks in the current piece
 		var blocks = BlockDropGame.piece.getElementsByClassName("piece-block");
 		for (var i = 0; i < blocks.length; i++) {
+			// Update their positions to the next rotation step
 			blocks[i].style.left = BlockDropGame.piece.blocksMap["rot"+BlockDropGame.piece.rotate][i].left * gridSize + "px";
 			blocks[i].style.top = BlockDropGame.piece.blocksMap["rot"+BlockDropGame.piece.rotate][i].top * gridSize + "px";
 		}

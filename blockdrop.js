@@ -67,15 +67,15 @@ var PieceFactory = {
 		
 		// Add these useful properties to the piece,
 		// can probably remove most of them now
-		newPiece.pieceSize = pieceBlueprint.size;
+		//newPiece.pieceSize = pieceBlueprint.size;
 		newPiece.blocksMap = pieceBlueprint.blocks;
-		newPiece.topVal = -gridSize;
-		newPiece.leftVal = gridSize * (5 - (Math.round(pieceBlueprint.size / 2)));
+		//newPiece.topVal = -gridSize;
+		//newPiece.leftVal = gridSize * (5 - (Math.round(pieceBlueprint.size / 2)));
 		newPiece.rotate = 0;
 		
 		// Size & position of the new piece
-		newPiece.style.top = newPiece.topVal + "px";
-		newPiece.style.left = newPiece.leftVal + "px"
+		newPiece.style.top = -gridSize + "px";
+		newPiece.style.left = gridSize * (5 - (Math.round(pieceBlueprint.size / 2))) + "px"
 		newPiece.style.width = gridSize * pieceBlueprint.size + "px";
 		newPiece.style.height = gridSize * pieceBlueprint.size + "px";
 		
@@ -97,7 +97,8 @@ var PieceFactory = {
 };
 
 var BlockDropGame = {
-	fps: 2,
+	score: 0,
+	speed: 1,
 	_intervalId: null
 };
 
@@ -332,6 +333,35 @@ BlockDropGame.clearCompleteRow = function(completeRow) {
 	}
 }
 
+// Is the newly created piece already overlapping an existing piece?
+// Only called when new pieces are created
+BlockDropGame.isGameOver = function() {
+	// No offset, we only care about where the piece is exactly
+	var offsets = {
+		top: 0,
+		left: 0
+	};
+	if (BlockDropGame.isIntersecting(BlockDropGame.piece, 'bottomWall', offsets)) {
+		return true;
+	}
+	return false;
+}
+
+// Before starting a new game, clear the current game board
+BlockDropGame.clearGameBoard = function() {
+	var allBlocks = gameWrapper.getElementsByClassName("piece-block");
+	var allBlocksLength = allBlocks.length;// the length changes as we remove blocks
+	
+	for (var i = 0; i < allBlocksLength; i++) {
+		// Always remove the first one
+		if (allBlocks[0].parentNode !== BlockDropGame.piece) {
+			gameWrapper.removeChild(allBlocks[0]);
+		}
+	}
+	
+	gameWrapper.removeChild(BlockDropGame.piece);
+}
+
 // Remove the piece wrapper and leave just the blocks behind
 // This makes it much easier to detect and remove completed rows
 BlockDropGame.addCurrentPieceToBoard = function() {
@@ -360,11 +390,26 @@ BlockDropGame.addCurrentPieceToBoard = function() {
 	gameWrapper.removeChild(BlockDropGame.piece);
 };
 
+// Initialise a game, create an initial piece and start the timer
+BlockDropGame.init = function() {
+	if (confirm("Ready to go, are you?")) {
+		// Create the initial piece and start the timer
+		BlockDropGame.piece = PieceFactory.create();
+		BlockDropGame.score = 0;
+		BlockDropGame.speed = 1;
+		BlockDropGame._intervalId = setInterval(BlockDropGame.update, 1000 / BlockDropGame.speed);
+	} else {
+		// Give them another chance, but lets not bug the user with setInterval
+		setTimeout(BlockDropGame.init, 2000);
+	}
+};
+
 // Automatically drop the current piece if possible
 // otherwise check for completed rows and then generate a new piece
 BlockDropGame.update = function() {
 	if (BlockDropGame.canMoveDown()) {
-		BlockDropGame.piece.topVal += gridSize;
+		//BlockDropGame.piece.topVal += gridSize;
+		BlockDropGame.piece.style.top = BlockDropGame.piece.offsetTop + gridSize + "px";
 	} else {
 		clearInterval(BlockDropGame._intervalId);
 		
@@ -376,35 +421,50 @@ BlockDropGame.update = function() {
 			// because when you clear the lower rows first the value
 			// of the higher rows to clear would need to drop too
 			BlockDropGame.clearCompleteRow(completeRows[i - 1]);
+			BlockDropGame.score++;
+			//console.log("score: " + BlockDropGame.score);
+			
+			// Increase the speed if we just hit a multiple of 10 
+			if (BlockDropGame.score % 10 === 0) {
+				//console.log("speeding up!");
+				BlockDropGame.speed++;
+			}
 		}
 
 		// Create a new piece and restart the timer
 		BlockDropGame.piece = PieceFactory.create();
-		BlockDropGame._intervalId = setInterval(BlockDropGame.run, 1000 / BlockDropGame.fps);
+		
+		if (BlockDropGame.isGameOver()) {
+		//if (!BlockDropGame.canMoveDown()) {
+			// If can't move straight after creating piece, game over!
+			alert("Game over! Your score was: " + BlockDropGame.score);
+			BlockDropGame.clearGameBoard();
+			BlockDropGame.init();
+			/*if (confirm("Game over! Your score was: " + BlockDropGame.score + ". Do you want to play again?")) {
+				
+			} else {
+				// do nothing?
+			} */
+		} else {
+			BlockDropGame._intervalId = setInterval(BlockDropGame.update, 1000 / BlockDropGame.speed);
+		}
 	}
 };
 
 // Ideally all style-related changes to the blocks should happen here.
-BlockDropGame.draw = function() {
+/* BlockDropGame.draw = function() {
 	BlockDropGame.piece.style.left = BlockDropGame.piece.leftVal + "px";
 	BlockDropGame.piece.style.top = BlockDropGame.piece.topVal + "px";
 	
 	//console.log("left: "+BlockDropGame.piece.offsetLeft+", top: "+BlockDropGame.piece.offsetTop+", width: "+BlockDropGame.piece.offsetWidth+", height: "+BlockDropGame.piece.offsetHeight);
-};
+}; */
 
 // The loop function, update the board, draw any changes
-BlockDropGame.run = function() {
+/* BlockDropGame.run = function() {
 	//console.log("running!");
 	BlockDropGame.update();
-	BlockDropGame.draw();
-}
-
-// Initialise a game, create an initial piece and start the timer
-BlockDropGame.init = function() {
-	BlockDropGame.piece = PieceFactory.create();
-	
-	BlockDropGame._intervalId = setInterval(BlockDropGame.run, 1000 / BlockDropGame.fps);
-}();
+	//BlockDropGame.draw();
+} */
 
 window.addEventListener("keydown", function(event) {
 	//console.log(keyPressed);
@@ -415,14 +475,16 @@ window.addEventListener("keydown", function(event) {
 		// left key or 'a'
 		//console.log("left");
 		if (BlockDropGame.canMoveLeft()) {
-			BlockDropGame.piece.leftVal -= gridSize;
+			//BlockDropGame.piece.leftVal -= gridSize;
+			BlockDropGame.piece.style.left = BlockDropGame.piece.offsetLeft - gridSize + "px";
 		}
 		event.preventDefault();
 	} else if (keyPressed == '39' || keyPressed == '68') {
 		// right key or 'd'
 		//console.log("right");
 		if (BlockDropGame.canMoveRight()) {
-			BlockDropGame.piece.leftVal += gridSize;
+			//BlockDropGame.piece.leftVal += gridSize;
+			BlockDropGame.piece.style.left = BlockDropGame.piece.offsetLeft + gridSize + "px";
 		}
 		event.preventDefault();
 	} else if (keyPressed == '38' || keyPressed == '87') {
@@ -448,10 +510,13 @@ window.addEventListener("keydown", function(event) {
 		// down key or 's'
 		//console.log("down");
 		if (BlockDropGame.canMoveDown()) {
-			BlockDropGame.piece.topVal += gridSize;
+			//BlockDropGame.piece.topVal += gridSize;
+			BlockDropGame.piece.style.top = BlockDropGame.piece.offsetTop + gridSize + "px";
 		}
 		event.preventDefault();
 	} 
 
-	BlockDropGame.draw();
+	//BlockDropGame.draw();
 });
+
+BlockDropGame.init();

@@ -7,7 +7,9 @@
 // Need to refactor all of the code into a closure.
 
 var gridSize = 30;		// Make this variable rather than fixed
-var gameWrapper = document.getElementById("game-wrapper");
+var gameWrapper = document.getElementById("game-board");
+var scoreElement = document.getElementById("game-score").getElementsByClassName("value")[0];
+var levelElement = document.getElementById("game-level").getElementsByClassName("value")[0];
 
 var PieceFactory = {
 	// Define our pieces here
@@ -97,6 +99,7 @@ var PieceFactory = {
 };
 
 var BlockDropGame = {
+	lines: 0,
 	score: 0,
 	speed: 1,
 	_intervalId: null
@@ -396,6 +399,7 @@ BlockDropGame.init = function() {
 		// Create the initial piece and start the timer
 		BlockDropGame.piece = PieceFactory.create();
 		BlockDropGame.score = 0;
+		BlockDropGame.lines = 0;
 		BlockDropGame.speed = 1;
 		BlockDropGame._intervalId = setInterval(BlockDropGame.update, 1000 / BlockDropGame.speed);
 	} else {
@@ -416,18 +420,40 @@ BlockDropGame.update = function() {
 		BlockDropGame.addCurrentPieceToBoard();
 		
 		var completeRows = BlockDropGame.findCompleteRows();
+		
+		// increment score before clearing rows
+		//console.log(completeRows.length);
+		switch (completeRows.length) {
+			case 4:
+				BlockDropGame.score += (1200 * BlockDropGame.speed);
+				break;
+			case 3:
+				BlockDropGame.score += (300 * BlockDropGame.speed);
+				break;
+			case 2:
+				BlockDropGame.score += (100 * BlockDropGame.speed);
+				break;
+			case 1:
+				BlockDropGame.score += (40 * BlockDropGame.speed);
+				break;
+			default:
+				break;
+		}
+		scoreElement.innerHTML = BlockDropGame.score;
+		
 		for (var i = completeRows.length; i > 0; i--) {
 			// Starting from the end of the array (highest complete row)
 			// because when you clear the lower rows first the value
 			// of the higher rows to clear would need to drop too
 			BlockDropGame.clearCompleteRow(completeRows[i - 1]);
-			BlockDropGame.score++;
+			BlockDropGame.lines++;
 			//console.log("score: " + BlockDropGame.score);
 			
-			// Increase the speed if we just hit a multiple of 10 
-			if (BlockDropGame.score % 10 === 0) {
+			// Increase the speed if we just hit a multiple of 10 lines 
+			if (BlockDropGame.lines % 10 === 0) {
 				//console.log("speeding up!");
 				BlockDropGame.speed++;
+				levelElement.innerHTML = BlockDropGame.speed;
 			}
 		}
 

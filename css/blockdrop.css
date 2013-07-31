@@ -1,14 +1,60 @@
+body {
+	margin: 0;
+	padding: 0;
+	
+	font-family: 'robotolocalcopy','Roboto',sans-serif;
+}
+
 h1 {
 	text-align: center;
 }
 
 #game-wrapper {
-	background: darkgray;
-	width: 300px; /* 10 * 30px */
-	height: 600px; /* 20 x 30px */
+	width: 500px;
+	height: 600px;
 	margin: 0 auto;
 	position: relative;
+}
+
+#game-board {
+	background: darkgray;
+	
+	width: 300px; /* 10 * 30px */
+	height: 600px; /* 20 x 30px */
 	overflow: hidden;
+	
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+#game-info {
+	background: black;
+	color: white;
+	
+	box-sizing: border-box;
+	width: 200px;
+	height: 600px;
+	padding: 20px;
+	
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+#game-score, #game-level {
+	margin: 0 0 1em;
+	font-size: 30px;
+	text-align: right;
+}
+
+#game-info .title {
+	display: block;
+	text-transform: lowercase;
+	font-weight: 100;
+}
+#game-info .value {
+	display: block;
+	font-weight: 900;
 }
 
 .piece-wrapper {

@@ -15,7 +15,7 @@ h1 {
 }
 
 #game-wrapper {
-	width: 17em;
+	width: 16em;
 	height: 20em;
 	margin: 0 auto;
 	position: relative;
@@ -37,7 +37,7 @@ h1 {
 	color: white;
 	
 	box-sizing: border-box;
-	width: 7em;
+	width: 6em;
 	height: 20em;
 	padding: 0.7em;
 	
@@ -46,20 +46,62 @@ h1 {
 	top: 0;
 }
 
-#game-level, #game-score, #game-lines {
-	margin: 0 0 0.7em;
-	font-size: 1em;
+#game-level, #game-score, #game-lines, #game-next {
+	margin: 0 0 0.5em;
 	text-align: right;
+	overflow: auto;
 }
 
 #game-info .title {
 	display: block;
 	text-transform: lowercase;
+	font-size: 0.9em;
 	font-weight: 100;
 }
 #game-info .value {
 	display: block;
 	font-weight: 900;
+}
+#game-info .container {
+	float: right;
+	display: block;
+	width: 4em;
+	height: 4em;
+	background: #333;
+	position: relative;
+}
+
+.button {
+	position: absolute;
+	cursor: pointer;
+
+	text-align: center;
+	text-transform: uppercase;
+	font-weight: 100;
+	
+	background: white;
+	color: black;
+	border-radius: 0.333em;
+	z-index: 99;
+}
+.button:hover {
+	background: #ddd;
+}
+#button-start, #button-resume {
+	left: 2.5em;
+	top: 9em;
+	
+	width: 5em;
+	height: 2em;
+	line-height: 2em;
+}
+#button-pause {
+	right: 1em;
+	bottom: 1em;
+	
+	width: 4em;
+	height: 2em;
+	line-height: 2em;
 }
 
 .piece-wrapper {

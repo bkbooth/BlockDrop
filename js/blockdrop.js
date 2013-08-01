@@ -4,14 +4,25 @@
  * bkbooth at gmail dot com
  */
 
-// Need to refactor all of the code into a closure.
+var BlockDropGame = function(targetElement) {
+	// gameplay variables
+	this.lines = 0;
+	this.score = 0;
+	this.speed = 1;
+	this._intervalId = null;
+	
+	// layout variables
+	this.baseSize = 14;		// This is the base font size, can resize the whole board with this
+	this.gridSize = 3;		// should be able to remove this entirely and entirely use base size
+	this.gameWrapper = null;
+	this.scoreElement = null
+	this.levelElement = null;
+	this.linesElement = null;
+	
+	this.initialSetup(targetElement);
+};
 
-var gridSize = 30;		// Make this variable rather than fixed
-var gameWrapper = document.getElementById("game-board");
-var scoreElement = document.getElementById("game-score").getElementsByClassName("value")[0];
-var levelElement = document.getElementById("game-level").getElementsByClassName("value")[0];
-
-var PieceFactory = {
+BlockDropGame.prototype.PieceFactory = {
 	// Define our pieces here
 	pieces: [
 		{ id: "o", size: 2, blocks: { // O/square piece
@@ -58,7 +69,7 @@ var PieceFactory = {
 		}}
 	],
 	
-	create: function() {
+	create: function(gridSize) {
 		// Randomly choose a piece blueprint to create from
 		var pieceBlueprint = this.pieces[Math.floor(Math.random() * this.pieces.length)];
 		
@@ -68,26 +79,22 @@ var PieceFactory = {
 		newPiece.className = "piece-wrapper";
 		
 		// Add these useful properties to the piece,
-		// can probably remove most of them now
-		//newPiece.pieceSize = pieceBlueprint.size;
 		newPiece.blocksMap = pieceBlueprint.blocks;
-		//newPiece.topVal = -gridSize;
-		//newPiece.leftVal = gridSize * (5 - (Math.round(pieceBlueprint.size / 2)));
 		newPiece.rotate = 0;
 		
 		// Size & position of the new piece
-		newPiece.style.top = -gridSize + "px";
-		newPiece.style.left = gridSize * (5 - (Math.round(pieceBlueprint.size / 2))) + "px"
-		newPiece.style.width = gridSize * pieceBlueprint.size + "px";
-		newPiece.style.height = gridSize * pieceBlueprint.size + "px";
+		newPiece.style.top = -gridSize + "em";
+		newPiece.style.left = gridSize * (5 - (Math.round(pieceBlueprint.size / 2))) + "em"
+		newPiece.style.width = gridSize * pieceBlueprint.size + "em";
+		newPiece.style.height = gridSize * pieceBlueprint.size + "em";
 		
 		// Loop through the blocks defined in the piece blueprint
 		pieceBlueprint.blocks["rot0"].forEach(function(offsets) {
 			// Create and setup the block for the piece
 			var block = document.createElement("div");
 			block.className = "piece-block piece-" + pieceBlueprint.id;
-			block.style.left = gridSize * offsets.left + "px";
-			block.style.top = gridSize * offsets.top + "px";
+			block.style.left = gridSize * offsets.left + "em";
+			block.style.top = gridSize * offsets.top + "em";
 			
 			// Append the block to the piece wrapper
 			newPiece.appendChild(block);
@@ -98,15 +105,57 @@ var PieceFactory = {
 	}
 };
 
-var BlockDropGame = {
-	lines: 0,
-	score: 0,
-	speed: 1,
-	_intervalId: null
-};
+// First time setup, create all the elements
+BlockDropGame.prototype.initialSetup = function(targetElement) {
+	var wrapperElement, infoWrapper, scoreWrapper, levelWrapper, linesWrapper;
+	
+	wrapperElement = targetElement || document.getElementsByTagName("body")[0];
+	
+	// create and append the game board
+	this.gameWrapper = document.createElement("div");
+	this.gameWrapper.setAttribute("id", "game-board");
+	wrapperElement.appendChild(this.gameWrapper);
+	
+	// create the info bar
+	infoWrapper = document.createElement("div");
+	infoWrapper.setAttribute("id", "game-info");
+	
+	// create and append the score display to the info bar
+	scoreWrapper = document.createElement("div");
+	scoreWrapper.setAttribute("id", "game-score");
+	scoreWrapper.innerHTML = "<span class='title'>Score:</span> ";
+	this.scoreElement = document.createElement("span");
+	this.scoreElement.setAttribute("class", "value");
+	this.scoreElement.innerText = 0;
+	scoreWrapper.appendChild(this.scoreElement);
+	infoWrapper.appendChild(scoreWrapper);
+	
+	// create and append the level display to the info bar
+	levelWrapper = document.createElement("div");
+	levelWrapper.setAttribute("id", "game-level");
+	levelWrapper.innerHTML = "<span class='title'>Level:</span> ";
+	this.levelElement = document.createElement("span");
+	this.levelElement.setAttribute("class", "value");
+	this.levelElement.innerText = 1;
+	levelWrapper.appendChild(this.levelElement);
+	infoWrapper.appendChild(levelWrapper);
+	
+	// create and append the lines display to the info bar
+	linesWrapper = document.createElement("div");
+	linesWrapper.setAttribute("id", "game-lines");
+	linesWrapper.innerHTML = "<span class='title'>Lines:</span> ";
+	this.linesElement = document.createElement("span");
+	this.linesElement.setAttribute("class", "value");
+	this.linesElement.innerText = 0;
+	linesWrapper.appendChild(this.linesElement);
+	infoWrapper.appendChild(linesWrapper);
+	
+	// append the info bar
+	wrapperElement.appendChild(infoWrapper);
+}
 
 // Simple bounding box check, used for both crude and precision checks
-BlockDropGame.isBoxIntersecting = function(sourceObject, targetObject, sourceOffsets) {
+BlockDropGame.prototype.isBoxIntersecting = function(sourceObject, targetObject, sourceOffsets) {
 	//console.log("bounding box detecting");
 	//console.log("direction: " + direction);
 	if (sourceObject.offsetTop + sourceObject.offsetHeight + sourceOffsets.top > targetObject.offsetTop &&		// source.bottom >= target.top
@@ -174,7 +223,7 @@ BlockDropGame.isIntersecting = function(object, target, offsets) {
 			// Check if any of the piece blocks will be outside the right wall
 			for (var i = 0; i < objectBlocks.length; i++) {
 				//console.log(objectBlocks[i].offsetLeft + object.leftVal);
-				if (object.offsetLeft + objectBlocks[i].offsetLeft + objectBlocks[i].offsetWidth + offsets.left > gridSize * 10) {
+				if (object.offsetLeft + objectBlocks[i].offsetLeft + objectBlocks[i].offsetWidth + offsets.left > gridSize * baseSize * 10) {
 					//console.log("right wall collision");
 					return true;
 				}
@@ -183,7 +232,7 @@ BlockDropGame.isIntersecting = function(object, target, offsets) {
 		case 'bottomWall':
 			// Check if any of the piece blocks will be outside the bottom wall
 			for (var i = 0; i < objectBlocks.length; i++) {
-				if (object.offsetTop + objectBlocks[i].offsetTop + objectBlocks[i].offsetHeight + offsets.top > gridSize * 20) {
+				if (object.offsetTop + objectBlocks[i].offsetTop + objectBlocks[i].offsetHeight + offsets.top > gridSize * baseSize * 20) {
 					//console.log("bottom wall collision");
 					return true;
 				}
@@ -207,7 +256,7 @@ BlockDropGame.canMoveLeft = function() {
 	// Offset 1 space to the left
 	var offsets = {
 		top: 0,
-		left: -gridSize
+		left: -gridSize * baseSize // convert this to px
 	};
 	if (BlockDropGame.isIntersecting(BlockDropGame.piece, 'leftWall', offsets)) {
 		return false;
@@ -220,7 +269,7 @@ BlockDropGame.canMoveRight = function() {
 	// Offset 1 space to the right
 	var offsets = {
 		top: 0,
-		left: gridSize
+		left: gridSize * baseSize // convert this to px
 	};
 	if (BlockDropGame.isIntersecting(BlockDropGame.piece, 'rightWall', offsets)) {
 		return false;
@@ -232,7 +281,7 @@ BlockDropGame.canMoveRight = function() {
 BlockDropGame.canMoveDown = function() {
 	// Offset 1 space down
 	var offsets = {
-		top: gridSize,
+		top: gridSize * baseSize,
 		left: 0
 	};
 	if (BlockDropGame.isIntersecting(BlockDropGame.piece, 'bottomWall', offsets)) {
@@ -254,15 +303,15 @@ BlockDropGame.canRotate = function() {
 	// Create a temporary piece with the next rotation step
 	tempPiece = document.createElement("div");
 	tempPiece.className = "piece-wrapper";
-	tempPiece.style.left = BlockDropGame.piece.offsetLeft + "px";
-	tempPiece.style.top = BlockDropGame.piece.offsetTop + "px";
+	tempPiece.style.left = (BlockDropGame.piece.offsetLeft / baseSize) + "em";
+	tempPiece.style.top = (BlockDropGame.piece.offsetTop / baseSize) + "em";
 	
 	// Add the blocks for the next rotation step
 	BlockDropGame.piece.blocksMap["rot"+tempRotate].forEach(function(offsets) {
 		var tempBlock = document.createElement("div");
 		tempBlock.className = "piece-block";
-		tempBlock.style.left = gridSize * offsets.left + "px";
-		tempBlock.style.top = gridSize * offsets.left + "px";
+		tempBlock.style.left = gridSize * offsets.left + "em";
+		tempBlock.style.top = gridSize * offsets.left + "em";
 		tempPiece.appendChild(tempBlock);
 	});
 	
@@ -287,8 +336,8 @@ BlockDropGame.findCompleteRows = function() {
 			// Check all blocks in the game board
 			for (k = 0; k < allBlocks.length; k++) {
 				// If we find a block at this row and column we can exit early
-				if (allBlocks[k].offsetTop === i * gridSize &&
-					allBlocks[k].offsetLeft === j * gridSize) {
+				if (allBlocks[k].offsetTop === i * gridSize * baseSize &&
+					allBlocks[k].offsetLeft === j * gridSize * baseSize) {
 					break;
 				}
 			}
@@ -319,14 +368,14 @@ BlockDropGame.clearCompleteRow = function(completeRow) {
 	
 	// Loop through all blocks on the game board
 	for (i = 0; i < allBlocks.length; i++) {
-		if (allBlocks[i].offsetTop === completeRow * gridSize) {
+		if (allBlocks[i].offsetTop === completeRow * gridSize * baseSize) {
 			// If the block is in this row, push it to be removed
 			// directly removing here breaks the loop
 			blocksToRemove.push(allBlocks[i]);
 			//allBlocks[i].parentNode.removeChild(allBlocks[i]);
-		} else if (allBlocks[i].offsetTop < completeRow * gridSize) {
+		} else if (allBlocks[i].offsetTop < completeRow * gridSize * baseSize) {
 			// If the block is above the row being removed, drop it 1 space
-			allBlocks[i].style.top = (allBlocks[i].offsetTop + gridSize) + "px";
+			allBlocks[i].style.top = ((allBlocks[i].offsetTop / baseSize) + gridSize) + "em";
 		}
 	}
 	
@@ -382,8 +431,8 @@ BlockDropGame.addCurrentPieceToBoard = function() {
 		
 		// Remove the block from the piece and update it's position
 		newBlock = BlockDropGame.piece.removeChild(pieceBlocks[0]);
-		newBlock.style.left = newLeft + "px";
-		newBlock.style.top = newTop + "px";
+		newBlock.style.left = (newLeft / baseSize) + "em";
+		newBlock.style.top = (newTop / baseSize) + "em";
 		
 		// Add the block back in as a child of the game board
 		gameWrapper.appendChild(newBlock);
@@ -396,6 +445,9 @@ BlockDropGame.addCurrentPieceToBoard = function() {
 // Initialise a game, create an initial piece and start the timer
 BlockDropGame.init = function() {
 	if (confirm("Ready to go, are you?")) {
+		// Set the base size
+		document.getElementsByTagName("body")[0].style.fontSize = baseSize + "px";
+		
 		// Create the initial piece and start the timer
 		BlockDropGame.piece = PieceFactory.create();
 		BlockDropGame.score = 0;
@@ -403,8 +455,8 @@ BlockDropGame.init = function() {
 		BlockDropGame.speed = 1;
 		BlockDropGame._intervalId = setInterval(BlockDropGame.update, 1000 / BlockDropGame.speed);
 	} else {
-		// Give them another chance, but lets not bug the user with setInterval
-		setTimeout(BlockDropGame.init, 2000);
+		// Give them another chance
+		//setTimeout(BlockDropGame.init, 2000);
 	}
 };
 
@@ -413,7 +465,7 @@ BlockDropGame.init = function() {
 BlockDropGame.update = function() {
 	if (BlockDropGame.canMoveDown()) {
 		//BlockDropGame.piece.topVal += gridSize;
-		BlockDropGame.piece.style.top = BlockDropGame.piece.offsetTop + gridSize + "px";
+		BlockDropGame.piece.style.top = (BlockDropGame.piece.offsetTop / baseSize) + gridSize + "em";
 	} else {
 		clearInterval(BlockDropGame._intervalId);
 		
@@ -447,7 +499,7 @@ BlockDropGame.update = function() {
 			// of the higher rows to clear would need to drop too
 			BlockDropGame.clearCompleteRow(completeRows[i - 1]);
 			BlockDropGame.lines++;
-			//console.log("score: " + BlockDropGame.score);
+			linesElement.innerHTML = BlockDropGame.lines;
 			
 			// Increase the speed if we just hit a multiple of 10 lines 
 			if (BlockDropGame.lines % 10 === 0) {
@@ -502,7 +554,7 @@ window.addEventListener("keydown", function(event) {
 		//console.log("left");
 		if (BlockDropGame.canMoveLeft()) {
 			//BlockDropGame.piece.leftVal -= gridSize;
-			BlockDropGame.piece.style.left = BlockDropGame.piece.offsetLeft - gridSize + "px";
+			BlockDropGame.piece.style.left = (BlockDropGame.piece.offsetLeft / baseSize) - gridSize + "em";
 		}
 		event.preventDefault();
 	} else if (keyPressed == '39' || keyPressed == '68') {
@@ -510,7 +562,7 @@ window.addEventListener("keydown", function(event) {
 		//console.log("right");
 		if (BlockDropGame.canMoveRight()) {
 			//BlockDropGame.piece.leftVal += gridSize;
-			BlockDropGame.piece.style.left = BlockDropGame.piece.offsetLeft + gridSize + "px";
+			BlockDropGame.piece.style.left = (BlockDropGame.piece.offsetLeft / baseSize) + gridSize + "em";
 		}
 		event.preventDefault();
 	} else if (keyPressed == '38' || keyPressed == '87') {
@@ -527,8 +579,8 @@ window.addEventListener("keydown", function(event) {
 		var blocks = BlockDropGame.piece.getElementsByClassName("piece-block");
 		for (var i = 0; i < blocks.length; i++) {
 			// Update their positions to the next rotation step
-			blocks[i].style.left = BlockDropGame.piece.blocksMap["rot"+BlockDropGame.piece.rotate][i].left * gridSize + "px";
-			blocks[i].style.top = BlockDropGame.piece.blocksMap["rot"+BlockDropGame.piece.rotate][i].top * gridSize + "px";
+			blocks[i].style.left = BlockDropGame.piece.blocksMap["rot"+BlockDropGame.piece.rotate][i].left * gridSize + "em";
+			blocks[i].style.top = BlockDropGame.piece.blocksMap["rot"+BlockDropGame.piece.rotate][i].top * gridSize + "em";
 		}
 		
 		event.preventDefault();
@@ -537,7 +589,7 @@ window.addEventListener("keydown", function(event) {
 		//console.log("down");
 		if (BlockDropGame.canMoveDown()) {
 			//BlockDropGame.piece.topVal += gridSize;
-			BlockDropGame.piece.style.top = BlockDropGame.piece.offsetTop + gridSize + "px";
+			BlockDropGame.piece.style.top = (BlockDropGame.piece.offsetTop / baseSize) + gridSize + "em";
 		}
 		event.preventDefault();
 	} 

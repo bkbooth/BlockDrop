@@ -2,12 +2,12 @@ body {
 	margin: 0;
 	padding: 0;
 	
-	font-family: 'Roboto',sans-serif;
+	font-family: 'robotolocalcopy','Roboto',sans-serif;
 	
 	/* this is our base size, everything else
 	 * is measured in ems so we can resize the whole
 	 * game by changing this */
-	font-size: 10px;
+	font-size: 30px;
 }
 
 h1 {
@@ -15,8 +15,8 @@ h1 {
 }
 
 #game-wrapper {
-	width: 50em;
-	height: 60em;
+	width: 17em;
+	height: 20em;
 	margin: 0 auto;
 	position: relative;
 }
@@ -24,8 +24,8 @@ h1 {
 #game-board {
 	background: darkgray;
 	
-	width: 30em;
-	height: 60em;
+	width: 10em;
+	height: 20em;
 	overflow: hidden;
 	
 	position: absolute;
@@ -37,9 +37,9 @@ h1 {
 	color: white;
 	
 	box-sizing: border-box;
-	width: 20em;
-	height: 60em;
-	padding: 2em;
+	width: 7em;
+	height: 20em;
+	padding: 0.7em;
 	
 	position: absolute;
 	right: 0;
@@ -47,8 +47,8 @@ h1 {
 }
 
 #game-level, #game-score, #game-lines {
-	margin: 0 0 1em;
-	font-size: 3em;
+	margin: 0 0 0.7em;
+	font-size: 1em;
 	text-align: right;
 }
 
@@ -68,10 +68,10 @@ h1 {
 
 .piece-block {
 	box-sizing: border-box;
-	width: 3em;
-	height: 3em;
-	border: 0.4em outset;
-	border-radius: 0.3em;
+	width: 1em;
+	height: 1em;
+	border: 0.1333em outset;
+	border-radius: 0.1em;
 	position: absolute;
 }
 

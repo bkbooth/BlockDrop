@@ -1,13 +1,18 @@
+html {
+	font-size: 10px;
+}
+
 body {
 	margin: 0;
 	padding: 0;
 	
 	font-family: 'robotolocalcopy','Roboto',sans-serif;
 	
-	/* this is our base size, everything else
-	 * is measured in ems so we can resize the whole
-	 * game by changing this */
-	font-size: 30px;
+	/* set the base font size as 10px in html,
+	 * can now resize the whole game board by
+	 * updating the body font size in em's
+	 */
+	font-size: 3em;
 }
 
 h1 {
@@ -39,7 +44,7 @@ h1 {
 	box-sizing: border-box;
 	width: 6em;
 	height: 20em;
-	padding: 0.7em;
+	padding: 1em;
 	
 	position: absolute;
 	right: 0;
@@ -76,16 +81,15 @@ h1 {
 	cursor: pointer;
 
 	text-align: center;
-	text-transform: uppercase;
-	font-weight: 100;
+	font-weight: 200;
 	
-	background: white;
-	color: black;
+	background: #428bca;
+	color: white;
 	border-radius: 0.333em;
 	z-index: 99;
 }
 .button:hover {
-	background: #ddd;
+	background: #357ebd;
 }
 #button-start, #button-resume {
 	left: 2.5em;
@@ -102,6 +106,42 @@ h1 {
 	width: 4em;
 	height: 2em;
 	line-height: 2em;
+}
+
+.dialog {
+	position: absolute;
+	left: 1em;
+	top: 7.5em;
+	
+	width: 6.4em;
+	padding: 0.8em;
+	
+	background: white;
+	border-radius: 0.1em;
+}
+.dialog div:first-child {
+	font-size: 0.7em;
+}
+.dialog .close-button {
+	position: absolute;
+	right: 0.25em;
+	top: 0.25em;
+	cursor: pointer;
+	
+	width: 0.8em;
+	height: 0.8em;
+	line-height: 0.6em;
+	
+	text-align: center;
+	font-weight: 200;
+	
+	background: #ca4242;
+	color: white;
+	border-radius: 0.1em;
+	z-index: 100;
+}
+.dialog .close-button:hover {
+	background: #b03a3a;
 }
 
 .piece-wrapper {

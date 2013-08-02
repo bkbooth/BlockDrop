@@ -12,7 +12,7 @@
 }
 
 /* Roboto Light */
-/* @font-face {
+@font-face {
     font-family: 'robotolocalcopy';
     src: url('../fonts/Roboto-Light-webfont.eot');
     src: url('../fonts/Roboto-Light-webfont.eot?#iefix') format('embedded-opentype'),
@@ -21,19 +21,19 @@
          url('../fonts/Roboto-Light-webfont.svg#robotolight') format('svg');
     font-weight: 200;
     font-style: normal;
-} */
+}
 
 /* Roboto Regular */
-@font-face {
+/* @font-face {
     font-family: 'robotolocalcopy';
     src: url('../fonts/Roboto-Regular-webfont.eot');
     src: url('../fonts/Roboto-Regular-webfont.eot?#iefix') format('embedded-opentype'),
          url('../fonts/Roboto-Regular-webfont.woff') format('woff'),
          url('../fonts/Roboto-Regular-webfont.ttf') format('truetype'),
          url('../fonts/Roboto-Regular-webfont.svg#robotoregular') format('svg');
-    font-weight: normal; /* 400 */
+    font-weight: normal; /* 400
     font-style: normal;
-}
+} */
 
 /* Roboto Medium */
 /* @font-face {

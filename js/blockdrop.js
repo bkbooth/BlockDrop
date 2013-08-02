@@ -12,6 +12,7 @@ var BlockDropGame = function(targetElement)
 	this.level = 1;
 	this._intervalId = null;
 	this.piece = null;
+	this.nextPiece = null;
 	
 	// layout variables
 	this.baseSize = 30;			// This is the base font size, can resize the whole board with this
@@ -22,10 +23,11 @@ var BlockDropGame = function(targetElement)
 	this.linesElement = null;
 	this.nextElement = null;
 	
-	// buttons
+	// dialogs
 	this.startButton = null;
 	this.pauseButton = null;
 	this.resumeButton = null;
+	this.finishDialog = null;
 	
 	// load the UI and listeners
 	this.initialSetup(targetElement);
@@ -85,8 +87,9 @@ var PieceFactory =
 	
 	create: function(pieceIndex)
 	{
-		// Randomly choose a piece blueprint to create from
-		var pieceBlueprint = this.pieces[Math.floor(Math.random() * this.pieces.length)];
+		// Use the passed index or randomly choose a piece blueprint to create from
+		pieceIndex = pieceIndex || Math.floor(Math.random() * this.pieces.length);
+		var pieceBlueprint = this.pieces[pieceIndex];
 		
 		// Create and setup the wrapper div for the piece 
 		var newPiece = document.createElement("div");
@@ -95,10 +98,11 @@ var PieceFactory =
 		// Add these useful properties to the piece,
 		newPiece.blocksMap = pieceBlueprint.blocks;
 		newPiece.rotate = 0;
+		newPiece.size = pieceBlueprint.size;
 		
 		// Size & position of the new piece
-		newPiece.style.top = -1 + "em";
-		newPiece.style.left = (5 - (Math.round(pieceBlueprint.size / 2))) + "em"
+		/* newPiece.style.top = -1 + "em";
+		newPiece.style.left = (5 - (Math.round(pieceBlueprint.size / 2))) + "em" */
 		newPiece.style.width = pieceBlueprint.size + "em";
 		newPiece.style.height = pieceBlueprint.size + "em";
 		
@@ -148,12 +152,12 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	nextWrapper = document.createElement("div");
 	nextWrapper.setAttribute("id", "game-next");
 	nextWrapper.innerHTML = "<span class='title'>Next:</span>"
-	nextContainer = document.createElement("div");
+	/* nextContainer = document.createElement("div");
 	nextContainer.setAttribute("class", "container");
-	nextWrapper.appendChild(nextContainer);
-	/* this.nextElement = document.createElement("div");
+	nextWrapper.appendChild(nextContainer); */
+	this.nextElement = document.createElement("div");
 	this.nextElement.setAttribute("class", "container");
-	nextWrapper.appendChild(this.nextElement); */
+	nextWrapper.appendChild(this.nextElement);
 	this.infoWrapper.appendChild(nextWrapper);
 	
 	// create and append the score display to the info bar
@@ -471,6 +475,7 @@ BlockDropGame.prototype.addCurrentPieceToBoard = function()
 // increment the score based on the number of rows completed
 BlockDropGame.prototype.incrementScore = function(numRows)
 {
+	console.log(numRows);
 	switch (numRows) {
 		case 4:
 			this.score += (1200 * this.level);
@@ -487,8 +492,6 @@ BlockDropGame.prototype.incrementScore = function(numRows)
 		default:
 			break;
 	}
-	
-	this.scoreElement.innerHTML = this.score;
 };
 
 // show the requested button
@@ -516,20 +519,29 @@ BlockDropGame.prototype.showDialog = function(button)
 			this.resumeButton.innerText = "Resume";
 			this.gameWrapper.appendChild(this.resumeButton);
 			break;
+		case "finish":
+			this.finishDialog = document.createElement("div");
+			this.finishDialog.setAttribute("id", "dialog-finish");
+			this.finishDialog.setAttribute("class", "dialog");
+			this.finishDialog.innerHTML = "<div>Game over!<br />Your score was: " + this.score + "</div>";
+			this.finishDialog.innerHTML += "<div class='close-button'>x</div>";
+			this.gameWrapper.appendChild(this.finishDialog);
+			break;
 		default:
 			break;
 	}
 };
 
 // hide the requested button, accepts string or object
-BlockDropGame.prototype.hideDialog = function(button)
+BlockDropGame.prototype.hideDialog = function(dialog)
 {
-	if (typeof button === "object" && (
-		button === this.startButton ||
-		button === this.pauseButton ||
-		button === this.resumeButton
+	if (typeof dialog === "object" && (
+		dialog === this.startButton ||
+		dialog === this.pauseButton ||
+		dialog === this.resumeButton ||
+		dialog === this.finishDialog
 	)) {
-		button.parentNode.removeChild(button);
+		dialog.parentNode.removeChild(dialog);
 	} else if (typeof button === "string") {
 		switch (button) {
 			case "start":
@@ -541,6 +553,9 @@ BlockDropGame.prototype.hideDialog = function(button)
 			case "resume":
 				this.resumeButton.parentNode.removeChild(this.resumeButton);
 				break;
+			case "finish":
+				this.finishDialog.parentNode.removeChild(this.finishButton);
+				break;
 			default:
 				break;
 		}
@@ -548,35 +563,50 @@ BlockDropGame.prototype.hideDialog = function(button)
 };
 
 // clear the timer, hide the game board
-BlockDropGame.prototype.pauseGame = function() {
+BlockDropGame.prototype.pauseGame = function()
+{
 	clearTimeout(this._intervalId);
 	
 	var allBlocks = this.gameWrapper.getElementsByClassName("piece-block");
 	for (var i = 0; i < allBlocks.length; i++) {
 		allBlocks[i].style.display = "none";
 	}
+	
+	this.nextPiece.style.display = "none";
 };
 
 // clear the timer, show the game board
-BlockDropGame.prototype.resumeGame = function() {
-	this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
-	
+BlockDropGame.prototype.resumeGame = function()
+{
 	var allBlocks = this.gameWrapper.getElementsByClassName("piece-block");
 	for (var i = 0; i < allBlocks.length; i++) {
 		allBlocks[i].style.display = "block";
 	}
+	
+	this.nextPiece.style.display = "block";
+	
+	this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
 };
 
 // Initialise a game, create an initial piece and start the timer
 BlockDropGame.prototype.init = function()
 {
-	// Create the initial piece and start the timer
+	// Create the initial piece
 	this.piece = this.gameWrapper.appendChild(PieceFactory.create());
-	//this.nextElement.appendChild(PieceFactory.create());
+	this.piece.style.top = -1 + "em";
+	this.piece.style.left = (5 - (Math.round(this.piece.size / 2))) + "em"; 
 	
+	this.nextPiece = this.nextElement.appendChild(PieceFactory.create());
+	this.nextPiece.style.left = ((4 - this.nextPiece.size) / 2) + "em";
+	this.nextPiece.style.top = ((4 - this.nextPiece.size) / 2) + "em";
+	
+	// Initialise the game variables
 	this.score = 0;
 	this.lines = 0;
 	this.level = 1;
+	this.drawElements();
+	
+	// Start the timer
 	this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
 };
 
@@ -594,45 +624,56 @@ BlockDropGame.prototype.update = function()
 		
 		var completeRows = this.findCompleteRows();
 		
+		this.incrementScore(completeRows.length);
+		
 		for (var i = completeRows.length; i > 0; i--) {
 			// Starting from the end of the array (highest complete row)
 			// because when you clear the lower rows first the value
 			// of the higher rows to clear would need to drop too
 			this.clearCompleteRow(completeRows[i - 1]);
 			this.lines++;
-			this.linesElement.innerHTML = this.lines;
 			
 			// Increase the level if we just hit a multiple of 10 lines 
 			if (this.lines % 10 === 0) {
 				//console.log("speeding up!");
 				this.level++;
-				this.levelElement.innerHTML = this.level;
 			}
 		}
 
 		// Create a new piece and restart the timer
-		this.piece = this.gameWrapper.appendChild(PieceFactory.create());
+		this.piece = this.nextPiece.parentNode.removeChild(this.nextPiece);
+		this.gameWrapper.appendChild(this.piece);
+		this.piece.style.top = -1 + "em";
+		this.piece.style.left = (5 - (Math.round(this.piece.size / 2))) + "em"; 
+		
+		this.nextPiece = this.nextElement.appendChild(PieceFactory.create());
+		this.nextPiece.style.left = ((4 - this.nextPiece.size) / 2) + "em";
+		this.nextPiece.style.top = ((4 - this.nextPiece.size) / 2) + "em";
 		
 		if (this.isGameOver()) {
-			alert("Game over! Your score was: " + this.score);
 			this.clearGameBoard();
-			this.init();
+			this.hideDialog(this.pauseButton);
+			this.nextPiece.parentNode.removeChild(this.nextPiece);
+			this.showDialog("finish");
 		} else {
 			this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
 		}
+		
+		this.drawElements();
 	}
 };
 
-// Ideally all style-related changes to the blocks should happen here.
-/* BlockDropGame.draw = function() {
-	BlockDropGame.piece.style.left = BlockDropGame.piece.leftVal + "px";
-	BlockDropGame.piece.style.top = BlockDropGame.piece.topVal + "px";
-	
-	//console.log("left: "+BlockDropGame.piece.offsetLeft+", top: "+BlockDropGame.piece.offsetTop+", width: "+BlockDropGame.piece.offsetWidth+", height: "+BlockDropGame.piece.offsetHeight);
-}; */
+// Ideally all output to the HTML should happen here
+BlockDropGame.prototype.drawElements = function()
+{
+	this.scoreElement.innerHTML = this.score;
+	this.linesElement.innerHTML = this.lines;
+	this.levelElement.innerHTML = this.level;
+};
 
 // The loop function, update the board, draw any changes
-/* BlockDropGame.run = function() {
+/* BlockDropGame.prototype.run = function()
+{
 	//console.log("running!");
 	BlockDropGame.update();
 	//BlockDropGame.draw();
@@ -666,6 +707,10 @@ BlockDropGame.prototype.setupEventListeners = function()
 			that.resumeGame();
 			
 			event.preventDefault();
+		} else if (event.target === that.finishDialog.getElementsByClassName("close-button")[0]) {
+			// hide the dialog, show the start button
+			that.hideDialog(that.finishDialog);
+			that.showDialog("start");
 		}
 	});
 	

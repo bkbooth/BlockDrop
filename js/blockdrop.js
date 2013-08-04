@@ -12,6 +12,7 @@ var BlockDropGame = function(targetElement)
 	this.score = 0;
 	this.level = 1;
 	this._intervalId = null;
+	this._dropWaitId = null;
 	this.piece = null;
 	this.nextPiece = null;
 	this.touchStartX = null;
@@ -49,12 +50,14 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	targetElement = targetElement || document.getElementsByTagName("body")[0];
 	
 	// Set the base size
-	var gameWidth = 16.0;
-	var gameHeight = 20.0;
+	var gameWidth = 16.5;
+	var gameHeight = 21.0;
 	var gameRatio = gameWidth / gameHeight;
 	if (window.innerWidth / window.innerHeight > gameRatio) {
+		// extra horizontal space
 		this.baseSize = Math.floor(window.innerHeight / gameHeight);
 	} else {
+		// extra vertical space
 		this.baseSize = Math.floor(window.innerWidth / gameWidth);
 	}
 	document.getElementsByTagName("body")[0].style.fontSize = this.baseSize + "px";
@@ -62,6 +65,7 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	// create and append the game wrapper
 	wrapperElement = document.createElement("div");
 	wrapperElement.setAttribute("id", "game-wrapper");
+	wrapperElement.style.marginTop = Math.floor((window.innerHeight - (this.baseSize * gameHeight)) / 2) + "px";
 	targetElement.appendChild(wrapperElement);
 	
 	// create and append the game board
@@ -178,6 +182,7 @@ BlockDropGame.prototype.update = function()
 		this.nextPiece.style.top = ((4 - this.nextPiece.size) / 2) + "em";
 		
 		if (this.isGameOver()) {
+			this.isPlaying = false;
 			this.clearGameBoard();
 			this.hideDialog(this.pauseButton);
 			this.nextPiece.parentNode.removeChild(this.nextPiece);
@@ -714,14 +719,23 @@ BlockDropGame.prototype.setupEventListeners = function()
 	window.addEventListener("touchstart", function(event) {
 		//console.log(event);
 		//console.log("start x: "+event.changedTouches[0].clientX+", y: "+event.changedTouches[0].clientY);
+		
+		if (!that.isPlaying) {
+			return;
+		}
+		
 		// set the location for the start of the touch
 		that.touchStartX = event.changedTouches[0].clientX;
 		that.touchStartY = event.changedTouches[0].clientY;
 	});
 	
 	window.addEventListener("touchmove", function(event) {
-		console.log(event);
+		//console.log(event);
 		//console.log("end x: "+event.changedTouches[0].clientX+", y: "+event.changedTouches[0].clientY);
+		
+		if (!that.isPlaying) {
+			return;
+		}
 		
 		// calculate the move
 		var touchEndX = event.changedTouches[0].clientX;

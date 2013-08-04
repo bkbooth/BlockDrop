@@ -4,6 +4,7 @@
  * bkbooth at gmail dot com
  */
 
+// Define all variables, setup all UI elements
 var BlockDropGame = function(targetElement)
 {
 	// gameplay variables
@@ -13,6 +14,9 @@ var BlockDropGame = function(targetElement)
 	this._intervalId = null;
 	this.piece = null;
 	this.nextPiece = null;
+	this.touchStartX = null;
+	this.touchStartY = null;
+	this.isPlaying = false;
 	
 	// layout variables
 	this.baseSize = 30;			// This is the base font size, can resize the whole board with this
@@ -37,92 +41,6 @@ var BlockDropGame = function(targetElement)
 	this.showDialog("start");
 };
 
-var PieceFactory =
-{
-	// Define our pieces here
-	pieces: [
-		{ id: "o", size: 2, blocks: { // O/square piece
-			rot0: [{ left: 0, top: 0 }, { left: 1, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }],
-			rot90: [{ left: 0, top: 0 }, { left: 1, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }],
-			rot180: [{ left: 0, top: 0 }, { left: 1, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }],
-			rot270: [{ left: 0, top: 0 }, { left: 1, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }]
-		}},
-		{ id: "l", size: 3, blocks: { // L piece
-			rot0: [{ left: 2, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }, { left: 2, top: 1 }],
-			rot90: [{ left: 1, top: 0 }, { left: 1, top: 1 }, { left: 1, top: 2 }, { left: 2, top: 2 }],
-			rot180: [{ left: 0, top: 1 }, { left: 1, top: 1 }, { left: 2, top: 1 }, { left: 0, top: 2 }],
-			rot270: [{ left: 0, top: 0 }, { left: 1, top: 0 }, { left: 1, top: 1 }, { left: 1, top: 2 }]
-		}},
-		{ id: "j", size: 3, blocks: { // J piece
-			rot0: [{ left: 0, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }, { left: 2, top: 1 }],
-			rot90: [{ left: 1, top: 0 }, { left: 2, top: 0 }, { left: 1, top: 1 }, { left: 1, top: 2 }],
-			rot180: [{ left: 0, top: 1 }, { left: 1, top: 1 }, { left: 2, top: 1 }, { left: 2, top: 2 }],
-			rot270: [{ left: 1, top: 0 }, { left: 1, top: 1 }, { left: 0, top: 2 }, { left: 1, top: 2 }]
-		}},
-		{ id: "s", size: 3, blocks: { // S piece
-			rot0: [{ left: 1, top: 0 }, { left: 2, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }],
-			rot90: [{ left: 1, top: 0 }, { left: 1, top: 1 }, { left: 2, top: 1 }, { left: 2, top: 2 }],
-			rot180: [{ left: 1, top: 1 }, { left: 2, top: 1 }, { left: 0, top: 2 }, { left: 1, top: 2 }],
-			rot270: [{ left: 0, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }, { left: 1, top: 2 }]
-		}},
-		{ id: "z", size: 3, blocks: { // Z piece
-			rot0: [{ left: 0, top: 0 }, { left: 1, top: 0 }, { left: 1, top: 1 }, { left: 2, top: 1 }],
-			rot90: [{ left: 2, top: 0 }, { left: 1, top: 1 }, { left: 2, top: 1 }, { left: 1, top: 2 }],
-			rot180: [{ left: 0, top: 1 }, { left: 1, top: 1 }, { left: 1, top: 2 }, { left: 2, top: 2 }],
-			rot270: [{ left: 1, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }, { left: 0, top: 2 }]
-		}},
-		{ id: "t", size: 3, blocks: { // T piece
-			rot0: [{ left: 1, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 },{ left: 2, top: 1 }],
-			rot90: [{ left: 1, top: 0 }, { left: 1, top: 1 }, { left: 2, top: 1 }, { left: 1, top: 2 }],
-			rot180: [{ left: 0, top: 1 }, { left: 1, top: 1 }, { left: 2, top: 1 }, { left: 1, top: 2 }],
-			rot270: [{ left: 1, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }, { left: 1, top: 2 }]
-		}},
-		{ id: "i", size: 4, blocks: { // I/straight piece
-			rot0: [{ left: 0, top: 1 }, { left: 1, top: 1 }, { left: 2, top: 1 }, { left: 3, top: 1 }],
-			rot90: [{ left: 2, top: 0 }, { left: 2, top: 1 }, { left: 2, top: 2 }, { left: 2, top: 3 }],
-			rot180: [{ left: 0, top: 2 }, { left: 1, top: 2 }, { left: 2, top: 2 }, { left: 3, top: 2 }],
-			rot270: [{ left: 1, top: 0 }, { left: 1, top: 1 }, { left: 1, top: 2 }, { left: 1, top: 3 }]
-		}}
-	],
-	
-	create: function(pieceIndex)
-	{
-		// Use the passed index or randomly choose a piece blueprint to create from
-		pieceIndex = pieceIndex || Math.floor(Math.random() * this.pieces.length);
-		var pieceBlueprint = this.pieces[pieceIndex];
-		
-		// Create and setup the wrapper div for the piece 
-		var newPiece = document.createElement("div");
-		newPiece.className = "piece-wrapper";
-		
-		// Add these useful properties to the piece,
-		newPiece.blocksMap = pieceBlueprint.blocks;
-		newPiece.rotate = 0;
-		newPiece.size = pieceBlueprint.size;
-		
-		// Size & position of the new piece
-		/* newPiece.style.top = -1 + "em";
-		newPiece.style.left = (5 - (Math.round(pieceBlueprint.size / 2))) + "em" */
-		newPiece.style.width = pieceBlueprint.size + "em";
-		newPiece.style.height = pieceBlueprint.size + "em";
-		
-		// Loop through the blocks defined in the piece blueprint
-		pieceBlueprint.blocks["rot0"].forEach(function(offsets) {
-			// Create and setup the block for the piece
-			var block = document.createElement("div");
-			block.className = "piece-block piece-" + pieceBlueprint.id;
-			block.style.left = offsets.left + "em";
-			block.style.top = offsets.top + "em";
-			
-			// Append the block to the piece wrapper
-			newPiece.appendChild(block);
-		});
-		
-		// Return the new piece
-		return newPiece;
-	}
-};
-
 // First time setup, create all the elements
 BlockDropGame.prototype.initialSetup = function(targetElement)
 {
@@ -131,6 +49,14 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	targetElement = targetElement || document.getElementsByTagName("body")[0];
 	
 	// Set the base size
+	var gameWidth = 16.0;
+	var gameHeight = 20.0;
+	var gameRatio = gameWidth / gameHeight;
+	if (window.innerWidth / window.innerHeight > gameRatio) {
+		this.baseSize = Math.floor(window.innerHeight / gameHeight);
+	} else {
+		this.baseSize = Math.floor(window.innerWidth / gameWidth);
+	}
 	document.getElementsByTagName("body")[0].style.fontSize = this.baseSize + "px";
 	
 	// create and append the game wrapper
@@ -152,9 +78,6 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	nextWrapper = document.createElement("div");
 	nextWrapper.setAttribute("id", "game-next");
 	nextWrapper.innerHTML = "<span class='title'>Next:</span>"
-	/* nextContainer = document.createElement("div");
-	nextContainer.setAttribute("class", "container");
-	nextWrapper.appendChild(nextContainer); */
 	this.nextElement = document.createElement("div");
 	this.nextElement.setAttribute("class", "container");
 	nextWrapper.appendChild(this.nextElement);
@@ -191,48 +114,171 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	this.infoWrapper.appendChild(linesWrapper);
 };
 
-// Simple bounding box check, used for both crude and precision checks
-BlockDropGame.prototype.isBoxIntersecting = function(sourceObject, targetObject, sourceOffsets)
+// Initialise a game, create an initial piece and start the timer
+BlockDropGame.prototype.init = function()
 {
-	if (sourceObject.offsetTop + sourceObject.offsetHeight + sourceOffsets.top > targetObject.offsetTop &&		// source.bottom >= target.top
-		sourceObject.offsetTop + sourceOffsets.top < targetObject.offsetTop + targetObject.offsetHeight &&		// source.top <= target.bottom
-		sourceObject.offsetLeft + sourceObject.offsetWidth + sourceOffsets.left > targetObject.offsetLeft &&	// source.right >= target.left
-		sourceObject.offsetLeft + sourceOffsets.left < targetObject.offsetLeft + targetObject.offsetWidth) {	// source.left <= target.right
-		return true;
+	// Create the initial piece
+	this.piece = this.gameWrapper.appendChild(PieceFactory.create());
+	this.piece.style.top = -1 + "em";
+	this.piece.style.left = (5 - (Math.round(this.piece.size / 2))) + "em"; 
+	
+	this.nextPiece = this.nextElement.appendChild(PieceFactory.create());
+	this.nextPiece.style.left = ((4 - this.nextPiece.size) / 2) + "em";
+	this.nextPiece.style.top = ((4 - this.nextPiece.size) / 2) + "em";
+	
+	// Initialise the game variables
+	this.score = 0;
+	this.lines = 0;
+	this.level = 1;
+	this.drawElements();
+	this.isPlaying = true;
+	
+	// Start the timer
+	this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
+};
+
+// Automatically drop the current piece if possible
+// otherwise check for completed rows and then generate a new piece
+BlockDropGame.prototype.update = function()
+{
+	//console.log(this);
+	if (this.canMoveDown()) {
+		this.piece.style.top = (this.piece.offsetTop / this.baseSize) + 1 + "em";
 	} else {
-		return false;
+		clearInterval(this._intervalId);
+		
+		this.addCurrentPieceToBoard();
+		
+		var completeRows = this.findCompleteRows();
+		
+		this.incrementScore(completeRows.length);
+		
+		for (var i = completeRows.length; i > 0; i--) {
+			// Starting from the end of the array (highest complete row)
+			// because when you clear the lower rows first the value
+			// of the higher rows to clear would need to drop too
+			this.clearCompleteRow(completeRows[i - 1]);
+			this.lines++;
+			
+			// Increase the level if we just hit a multiple of 10 lines 
+			if (this.lines % 10 === 0) {
+				//console.log("speeding up!");
+				this.level++;
+			}
+		}
+
+		// Create a new piece and restart the timer
+		this.piece = this.nextPiece.parentNode.removeChild(this.nextPiece);
+		this.gameWrapper.appendChild(this.piece);
+		this.piece.style.top = -1 + "em";
+		this.piece.style.left = (5 - (Math.round(this.piece.size / 2))) + "em"; 
+		
+		this.nextPiece = this.nextElement.appendChild(PieceFactory.create());
+		this.nextPiece.style.left = ((4 - this.nextPiece.size) / 2) + "em";
+		this.nextPiece.style.top = ((4 - this.nextPiece.size) / 2) + "em";
+		
+		if (this.isGameOver()) {
+			this.clearGameBoard();
+			this.hideDialog(this.pauseButton);
+			this.nextPiece.parentNode.removeChild(this.nextPiece);
+			this.showDialog("finish");
+		} else {
+			this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
+		}
+		
+		this.drawElements();
 	}
 };
 
-// Compare the blocks of the current piece to all other blocks on the game board
-BlockDropGame.prototype.checkAllBlocks = function(object, offsets)
+// The loop function, update the board, draw any changes
+/* BlockDropGame.prototype.run = function()
 {
-	// Initialise some variables
-	var i, j, allBlocks = this.gameWrapper.getElementsByClassName("piece-block"),
-		objectBlocks = object.getElementsByClassName("piece-block");
-	
-	// Loop through all blocks on the game board
-	for (i = 0; i < allBlocks.length; i++) {
-		// Ignore blocks from the current piece
-		if (allBlocks[i].parentNode !== object) {
-			// Loop through all blocks of the current piece
-			for (j = 0; j < objectBlocks.length; j++) {
-				// Do a simple box collision check
-				if (this.isBoxIntersecting({
-					// need to create a new source object accounting for parent offsets
-					// maybe there's a better way?
-					offsetLeft: object.offsetLeft + objectBlocks[j].offsetLeft,
-					offsetTop: object.offsetTop + objectBlocks[j].offsetTop,
-					offsetWidth: objectBlocks[j].offsetWidth,
-					offsetHeight: objectBlocks[j].offsetHeight
-				}, allBlocks[i], offsets)) {
-					return true;
-				}
-			}
-		}
-	}
+	//console.log("running!");
+	BlockDropGame.update();
+	//BlockDropGame.draw();
+} */
 
-	return false;
+// Ideally all output to the HTML should happen here
+BlockDropGame.prototype.drawElements = function()
+{
+	this.scoreElement.innerHTML = this.score;
+	this.linesElement.innerHTML = this.lines;
+	this.levelElement.innerHTML = this.level;
+};
+
+// Check if moving down will cause a collision with the bottom wall or other blocks
+BlockDropGame.prototype.canMoveDown = function()
+{
+	// Offset 1 space down
+	var offsets = {
+		top: this.baseSize, // this needs to be px
+		left: 0
+	};
+	if (this.isIntersecting(this.piece, 'bottomWall', offsets)) {
+		return false;
+	}
+	return true;
+};
+
+// Check if moving left will cause a collision with the left wall or other blocks
+BlockDropGame.prototype.canMoveLeft = function()
+{
+	// Offset 1 space to the left
+	var offsets = {
+		top: 0,
+		left: -this.baseSize // this needs to be px
+	};
+	if (this.isIntersecting(this.piece, 'leftWall', offsets)) {
+		return false;
+	}
+	return true;
+};
+
+// Check if moving right will cause a collision with the right wall or other blocks
+BlockDropGame.prototype.canMoveRight = function()
+{
+	// Offset 1 space to the right
+	var offsets = {
+		top: 0,
+		left: this.baseSize // this needs to be px
+	};
+	if (this.isIntersecting(this.piece, 'rightWall', offsets)) {
+		return false;
+	}
+	return true;
+};
+
+// Check if rotating will cause a collision with other pieces
+// Always want to allow rotation against a wall, will simply adjust position after rotate
+BlockDropGame.prototype.canRotate = function()
+{	
+	// Set the next rotation step
+	var tempPiece, tempRotate = this.piece.rotate + 90;
+	if (tempRotate >= 360) {
+		tempRotate = 0;
+	}
+	
+	// Create a temporary piece with the next rotation step
+	tempPiece = document.createElement("div");
+	tempPiece.className = "piece-wrapper";
+	tempPiece.style.left = (this.piece.offsetLeft / this.baseSize) + "em";
+	tempPiece.style.top = (this.piece.offsetTop / this.baseSize) + "em";
+	
+	// Add the blocks for the next rotation step
+	this.piece.blocksMap["rot"+tempRotate].forEach(function(offsets) {
+		var tempBlock = document.createElement("div");
+		tempBlock.className = "piece-block";
+		tempBlock.style.left = offsets.left + "em";
+		tempBlock.style.top = offsets.left + "em";
+		tempPiece.appendChild(tempBlock);
+	});
+	
+	// Intersection test with no offsets
+	if (this.isIntersecting(tempPiece, 'leftWall', {left: 0, top: 0})) {
+		return false;
+	}
+	
+	return true;
 };
 
 // Is the current piece intersecting with any walls or other pieces?
@@ -278,80 +324,48 @@ BlockDropGame.prototype.isIntersecting = function(object, target, offsets)
 	return false;
 };
 
-// Check if moving left will cause a collision with the left wall or other blocks
-BlockDropGame.prototype.canMoveLeft = function()
+// Compare the blocks of the current piece to all other blocks on the game board
+BlockDropGame.prototype.checkAllBlocks = function(object, offsets)
 {
-	// Offset 1 space to the left
-	var offsets = {
-		top: 0,
-		left: -this.baseSize // this needs to be px
-	};
-	if (this.isIntersecting(this.piece, 'leftWall', offsets)) {
-		return false;
+	// Initialise some variables
+	var i, j, allBlocks = this.gameWrapper.getElementsByClassName("piece-block"),
+		objectBlocks = object.getElementsByClassName("piece-block");
+	
+	// Loop through all blocks on the game board
+	for (i = 0; i < allBlocks.length; i++) {
+		// Ignore blocks from the current piece
+		if (allBlocks[i].parentNode !== object) {
+			// Loop through all blocks of the current piece
+			for (j = 0; j < objectBlocks.length; j++) {
+				// Do a simple box collision check
+				if (this.isBoxIntersecting({
+					// need to create a new source object accounting for parent offsets
+					// maybe there's a better way?
+					offsetLeft: object.offsetLeft + objectBlocks[j].offsetLeft,
+					offsetTop: object.offsetTop + objectBlocks[j].offsetTop,
+					offsetWidth: objectBlocks[j].offsetWidth,
+					offsetHeight: objectBlocks[j].offsetHeight
+				}, allBlocks[i], offsets)) {
+					return true;
+				}
+			}
+		}
 	}
-	return true;
+
+	return false;
 };
 
-// Check if moving right will cause a collision with the right wall or other blocks
-BlockDropGame.prototype.canMoveRight = function()
+// Simple bounding box check, used for both crude and precision checks
+BlockDropGame.prototype.isBoxIntersecting = function(sourceObject, targetObject, sourceOffsets)
 {
-	// Offset 1 space to the right
-	var offsets = {
-		top: 0,
-		left: this.baseSize // this needs to be px
-	};
-	if (this.isIntersecting(this.piece, 'rightWall', offsets)) {
+	if (sourceObject.offsetTop + sourceObject.offsetHeight + sourceOffsets.top > targetObject.offsetTop &&		// source.bottom >= target.top
+		sourceObject.offsetTop + sourceOffsets.top < targetObject.offsetTop + targetObject.offsetHeight &&		// source.top <= target.bottom
+		sourceObject.offsetLeft + sourceObject.offsetWidth + sourceOffsets.left > targetObject.offsetLeft &&	// source.right >= target.left
+		sourceObject.offsetLeft + sourceOffsets.left < targetObject.offsetLeft + targetObject.offsetWidth) {	// source.left <= target.right
+		return true;
+	} else {
 		return false;
 	}
-	return true;
-};
-
-
-// Check if moving down will cause a collision with the bottom wall or other blocks
-BlockDropGame.prototype.canMoveDown = function()
-{
-	// Offset 1 space down
-	var offsets = {
-		top: this.baseSize, // this needs to be px
-		left: 0
-	};
-	if (this.isIntersecting(this.piece, 'bottomWall', offsets)) {
-		return false;
-	}
-	return true;
-};
-
-// Check if rotating will cause a collision with other pieces
-// Always want to allow rotation against a wall, will simply adjust position after rotate
-BlockDropGame.prototype.canRotate = function()
-{	
-	// Set the next rotation step
-	var tempPiece, tempRotate = this.piece.rotate + 90;
-	if (tempRotate >= 360) {
-		tempRotate = 0;
-	}
-	
-	// Create a temporary piece with the next rotation step
-	tempPiece = document.createElement("div");
-	tempPiece.className = "piece-wrapper";
-	tempPiece.style.left = (this.piece.offsetLeft / this.baseSize) + "em";
-	tempPiece.style.top = (this.piece.offsetTop / this.baseSize) + "em";
-	
-	// Add the blocks for the next rotation step
-	this.piece.blocksMap["rot"+tempRotate].forEach(function(offsets) {
-		var tempBlock = document.createElement("div");
-		tempBlock.className = "piece-block";
-		tempBlock.style.left = offsets.left + "em";
-		tempBlock.style.top = offsets.left + "em";
-		tempPiece.appendChild(tempBlock);
-	});
-	
-	// Intersection test with no offsets
-	if (this.isIntersecting(tempPiece, 'leftWall', {left: 0, top: 0})) {
-		return false;
-	}
-	
-	return true;
 };
 
 // Create and return a list of rows which are full of blocks
@@ -566,6 +580,7 @@ BlockDropGame.prototype.hideDialog = function(dialog)
 BlockDropGame.prototype.pauseGame = function()
 {
 	clearTimeout(this._intervalId);
+	this.isPlaying = false;
 	
 	var allBlocks = this.gameWrapper.getElementsByClassName("piece-block");
 	for (var i = 0; i < allBlocks.length; i++) {
@@ -585,100 +600,52 @@ BlockDropGame.prototype.resumeGame = function()
 	
 	this.nextPiece.style.display = "block";
 	
+	this.isPlaying = true;
 	this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
 };
 
-// Initialise a game, create an initial piece and start the timer
-BlockDropGame.prototype.init = function()
-{
-	// Create the initial piece
-	this.piece = this.gameWrapper.appendChild(PieceFactory.create());
-	this.piece.style.top = -1 + "em";
-	this.piece.style.left = (5 - (Math.round(this.piece.size / 2))) + "em"; 
-	
-	this.nextPiece = this.nextElement.appendChild(PieceFactory.create());
-	this.nextPiece.style.left = ((4 - this.nextPiece.size) / 2) + "em";
-	this.nextPiece.style.top = ((4 - this.nextPiece.size) / 2) + "em";
-	
-	// Initialise the game variables
-	this.score = 0;
-	this.lines = 0;
-	this.level = 1;
-	this.drawElements();
-	
-	// Start the timer
-	this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
-};
-
-// Automatically drop the current piece if possible
-// otherwise check for completed rows and then generate a new piece
-BlockDropGame.prototype.update = function()
-{
-	//console.log(this);
-	if (this.canMoveDown()) {
-		this.piece.style.top = (this.piece.offsetTop / this.baseSize) + 1 + "em";
-	} else {
-		clearInterval(this._intervalId);
-		
-		this.addCurrentPieceToBoard();
-		
-		var completeRows = this.findCompleteRows();
-		
-		this.incrementScore(completeRows.length);
-		
-		for (var i = completeRows.length; i > 0; i--) {
-			// Starting from the end of the array (highest complete row)
-			// because when you clear the lower rows first the value
-			// of the higher rows to clear would need to drop too
-			this.clearCompleteRow(completeRows[i - 1]);
-			this.lines++;
-			
-			// Increase the level if we just hit a multiple of 10 lines 
-			if (this.lines % 10 === 0) {
-				//console.log("speeding up!");
-				this.level++;
-			}
-		}
-
-		// Create a new piece and restart the timer
-		this.piece = this.nextPiece.parentNode.removeChild(this.nextPiece);
-		this.gameWrapper.appendChild(this.piece);
-		this.piece.style.top = -1 + "em";
-		this.piece.style.left = (5 - (Math.round(this.piece.size / 2))) + "em"; 
-		
-		this.nextPiece = this.nextElement.appendChild(PieceFactory.create());
-		this.nextPiece.style.left = ((4 - this.nextPiece.size) / 2) + "em";
-		this.nextPiece.style.top = ((4 - this.nextPiece.size) / 2) + "em";
-		
-		if (this.isGameOver()) {
-			this.clearGameBoard();
-			this.hideDialog(this.pauseButton);
-			this.nextPiece.parentNode.removeChild(this.nextPiece);
-			this.showDialog("finish");
-		} else {
-			this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
-		}
-		
-		this.drawElements();
+// left key or left swipe handler
+BlockDropGame.prototype.moveLeftHandler = function() {
+	if (this.canMoveLeft()) {
+		this.piece.style.left = (this.piece.offsetLeft / this.baseSize) - 1 + "em";
 	}
 };
 
-// Ideally all output to the HTML should happen here
-BlockDropGame.prototype.drawElements = function()
-{
-	this.scoreElement.innerHTML = this.score;
-	this.linesElement.innerHTML = this.lines;
-	this.levelElement.innerHTML = this.level;
+// right key or right swipe handler
+BlockDropGame.prototype.moveRightHandler = function() {
+	if (this.canMoveRight()) {
+		this.piece.style.left = (this.piece.offsetLeft / this.baseSize) + 1 + "em";
+	}
 };
 
-// The loop function, update the board, draw any changes
-/* BlockDropGame.prototype.run = function()
-{
-	//console.log("running!");
-	BlockDropGame.update();
-	//BlockDropGame.draw();
-} */
+// down key or swipe down handler
+BlockDropGame.prototype.moveDownHandler = function() {
+	//clearInterval(that._intervalId);
+	if (this.canMoveDown()) {
+		this.piece.style.top = (this.piece.offsetTop / this.baseSize) + 1 + "em";
+	}
+	//that._intervalId = setInterval(that.update.bind(that), 1000 / that.level);
+};
 
+// up key or swipe up handler
+BlockDropGame.prototype.rotateHandler = function() {
+	if (this.canRotate()) {
+		this.piece.rotate += 90;
+		if (this.piece.rotate >= 360) {
+			this.piece.rotate = 0;
+		}
+	}
+
+	// Loop through the blocks in the current piece
+	var blocks = this.piece.getElementsByClassName("piece-block");
+	for (var i = 0; i < blocks.length; i++) {
+		// Update their positions to the next rotation step
+		blocks[i].style.left = this.piece.blocksMap["rot"+this.piece.rotate][i].left + "em";
+		blocks[i].style.top = this.piece.blocksMap["rot"+this.piece.rotate][i].top + "em";
+	}
+};
+
+// Setup the event listeners
 BlockDropGame.prototype.setupEventListeners = function()
 {
 	var that = this;
@@ -707,7 +674,7 @@ BlockDropGame.prototype.setupEventListeners = function()
 			that.resumeGame();
 			
 			event.preventDefault();
-		} else if (event.target === that.finishDialog.getElementsByClassName("close-button")[0]) {
+		} else if (that.finishDialog && event.target === that.finishDialog.getElementsByClassName("close-button")[0]) {
 			// hide the dialog, show the start button
 			that.hideDialog(that.finishDialog);
 			that.showDialog("start");
@@ -722,47 +689,162 @@ BlockDropGame.prototype.setupEventListeners = function()
 		if (keyPressed == '37' || keyPressed == '65') {
 			// left key or 'a'
 			//console.log("left");
-			if (that.canMoveLeft()) {
-				that.piece.style.left = (that.piece.offsetLeft / that.baseSize) - 1 + "em";
-			}
+			that.moveLeftHandler();
 			event.preventDefault();
 		} else if (keyPressed == '39' || keyPressed == '68') {
 			// right key or 'd'
 			//console.log("right");
-			if (that.canMoveRight()) {
-				that.piece.style.left = (that.piece.offsetLeft / that.baseSize) + 1 + "em";
-			}
+			that.moveRightHandler();
 			event.preventDefault();
 		} else if (keyPressed == '38' || keyPressed == '87') {
 			// up key or 'w'
 			//console.log("up");
-			if (that.canRotate()) {
-				that.piece.rotate += 90;
-				if (that.piece.rotate >= 360) {
-					that.piece.rotate = 0;
-				}
-			}
-	
-			// Loop through the blocks in the current piece
-			var blocks = that.piece.getElementsByClassName("piece-block");
-			for (var i = 0; i < blocks.length; i++) {
-				// Update their positions to the next rotation step
-				blocks[i].style.left = that.piece.blocksMap["rot"+that.piece.rotate][i].left + "em";
-				blocks[i].style.top = that.piece.blocksMap["rot"+that.piece.rotate][i].top + "em";
-			}
-			
+			that.rotateHandler();
 			event.preventDefault();
 		} else if (keyPressed == '40' || keyPressed == '83') {
 			// down key or 's'
 			//console.log("down");
-			clearInterval(that._intervalId);
-			if (that.canMoveDown()) {
-				that.piece.style.top = (that.piece.offsetTop / that.baseSize) + 1 + "em";
-			}
-			that._intervalId = setInterval(that.update.bind(that), 1000 / that.level);
+			that.moveDownHandler();
 			event.preventDefault();
-		} 
+		}
 	
 		//BlockDropGame.draw();
 	});
+	
+	window.addEventListener("touchstart", function(event) {
+		//console.log(event);
+		//console.log("start x: "+event.changedTouches[0].clientX+", y: "+event.changedTouches[0].clientY);
+		// set the location for the start of the touch
+		that.touchStartX = event.changedTouches[0].clientX;
+		that.touchStartY = event.changedTouches[0].clientY;
+	});
+	
+	window.addEventListener("touchmove", function(event) {
+		console.log(event);
+		//console.log("end x: "+event.changedTouches[0].clientX+", y: "+event.changedTouches[0].clientY);
+		
+		// calculate the move
+		var touchEndX = event.changedTouches[0].clientX;
+		var touchEndY = event.changedTouches[0].clientY;
+		var touchMoveX = touchEndX - that.touchStartX;
+		var touchMoveY = touchEndY - that.touchStartY;
+		
+		// lets check what kind of movement
+		if (Math.abs(touchMoveX) > Math.abs(touchMoveY)) {
+			// horizontal swipe
+			if (touchMoveX > 0) {
+				// right swipe
+				//console.log("swipe right");
+				that.moveRightHandler();
+				//event.preventDefault();
+			} else {
+				// left swipe
+				//console.log("swipe left");
+				that.moveLeftHandler();
+				//event.preventDefault();
+			}
+		} else {
+			// vertical swipe
+			if (touchMoveY > 0) {
+				// down swipe
+				//console.log("swipe down");
+				that.moveDownHandler();
+				event.preventDefault(); // allow to swipe and hold down
+			} else {
+				// up swipe
+				//console.log("swipe up");
+				that.rotateHandler();
+				//event.preventDefault();
+			}
+		}
+	});
+};
+
+var PieceFactory =
+{
+	// Define our pieces here
+	pieces: [
+		{ id: "o", size: 2, blocks: { // O/square piece
+			rot0: [{ left: 0, top: 0 }, { left: 1, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }],
+			rot90: [{ left: 0, top: 0 }, { left: 1, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }],
+			rot180: [{ left: 0, top: 0 }, { left: 1, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }],
+			rot270: [{ left: 0, top: 0 }, { left: 1, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }]
+		}},
+		{ id: "l", size: 3, blocks: { // L piece
+			rot0: [{ left: 2, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }, { left: 2, top: 1 }],
+			rot90: [{ left: 1, top: 0 }, { left: 1, top: 1 }, { left: 1, top: 2 }, { left: 2, top: 2 }],
+			rot180: [{ left: 0, top: 1 }, { left: 1, top: 1 }, { left: 2, top: 1 }, { left: 0, top: 2 }],
+			rot270: [{ left: 0, top: 0 }, { left: 1, top: 0 }, { left: 1, top: 1 }, { left: 1, top: 2 }]
+		}},
+		{ id: "j", size: 3, blocks: { // J piece
+			rot0: [{ left: 0, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }, { left: 2, top: 1 }],
+			rot90: [{ left: 1, top: 0 }, { left: 2, top: 0 }, { left: 1, top: 1 }, { left: 1, top: 2 }],
+			rot180: [{ left: 0, top: 1 }, { left: 1, top: 1 }, { left: 2, top: 1 }, { left: 2, top: 2 }],
+			rot270: [{ left: 1, top: 0 }, { left: 1, top: 1 }, { left: 0, top: 2 }, { left: 1, top: 2 }]
+		}},
+		{ id: "s", size: 3, blocks: { // S piece
+			rot0: [{ left: 1, top: 0 }, { left: 2, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }],
+			rot90: [{ left: 1, top: 0 }, { left: 1, top: 1 }, { left: 2, top: 1 }, { left: 2, top: 2 }],
+			rot180: [{ left: 1, top: 1 }, { left: 2, top: 1 }, { left: 0, top: 2 }, { left: 1, top: 2 }],
+			rot270: [{ left: 0, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }, { left: 1, top: 2 }]
+		}},
+		{ id: "z", size: 3, blocks: { // Z piece
+			rot0: [{ left: 0, top: 0 }, { left: 1, top: 0 }, { left: 1, top: 1 }, { left: 2, top: 1 }],
+			rot90: [{ left: 2, top: 0 }, { left: 1, top: 1 }, { left: 2, top: 1 }, { left: 1, top: 2 }],
+			rot180: [{ left: 0, top: 1 }, { left: 1, top: 1 }, { left: 1, top: 2 }, { left: 2, top: 2 }],
+			rot270: [{ left: 1, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }, { left: 0, top: 2 }]
+		}},
+		{ id: "t", size: 3, blocks: { // T piece
+			rot0: [{ left: 1, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 },{ left: 2, top: 1 }],
+			rot90: [{ left: 1, top: 0 }, { left: 1, top: 1 }, { left: 2, top: 1 }, { left: 1, top: 2 }],
+			rot180: [{ left: 0, top: 1 }, { left: 1, top: 1 }, { left: 2, top: 1 }, { left: 1, top: 2 }],
+			rot270: [{ left: 1, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }, { left: 1, top: 2 }]
+		}},
+		{ id: "i", size: 4, blocks: { // I/straight piece
+			rot0: [{ left: 0, top: 1 }, { left: 1, top: 1 }, { left: 2, top: 1 }, { left: 3, top: 1 }],
+			rot90: [{ left: 2, top: 0 }, { left: 2, top: 1 }, { left: 2, top: 2 }, { left: 2, top: 3 }],
+			rot180: [{ left: 0, top: 2 }, { left: 1, top: 2 }, { left: 2, top: 2 }, { left: 3, top: 2 }],
+			rot270: [{ left: 1, top: 0 }, { left: 1, top: 1 }, { left: 1, top: 2 }, { left: 1, top: 3 }]
+		}}
+	],
+	
+	
+	// Create and return a new Tetris piece, can be random or a pre-defined piece.
+	create: function(pieceIndex)
+	{
+		// Use the passed index or randomly choose a piece blueprint to create from
+		if (!(typeof pieceIndex === "number" && pieceIndex >= 0 && pieceIndex <= this.pieces.length)) {
+			pieceIndex = Math.floor(Math.random() * this.pieces.length);
+		}
+		var pieceBlueprint = this.pieces[pieceIndex];
+		
+		// Create and setup the wrapper div for the piece 
+		var newPiece = document.createElement("div");
+		newPiece.className = "piece-wrapper";
+		
+		// Add these useful properties to the piece,
+		newPiece.blocksMap = pieceBlueprint.blocks;
+		newPiece.rotate = 0;
+		newPiece.size = pieceBlueprint.size;
+		
+		// Size of the new piece
+		// positioning not handled here anymore, caller sets position
+		newPiece.style.width = pieceBlueprint.size + "em";
+		newPiece.style.height = pieceBlueprint.size + "em";
+		
+		// Loop through the blocks defined in the piece blueprint
+		pieceBlueprint.blocks["rot0"].forEach(function(offsets) {
+			// Create and setup the block for the piece
+			var block = document.createElement("div");
+			block.className = "piece-block piece-" + pieceBlueprint.id;
+			block.style.left = offsets.left + "em";
+			block.style.top = offsets.top + "em";
+			
+			// Append the block to the piece wrapper
+			newPiece.appendChild(block);
+		});
+		
+		// Return the new piece
+		return newPiece;
+	}
 };

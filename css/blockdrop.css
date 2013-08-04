@@ -38,6 +38,8 @@ h1 {
 	background: black;
 	color: white;
 	
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 	width: 6em;
 	height: 20em;
@@ -146,6 +148,8 @@ h1 {
 }
 
 .piece-block {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 	width: 1em;
 	height: 1em;

@@ -89,7 +89,7 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	scoreWrapper.innerHTML = "<span class='title'>Score:</span> ";
 	this.scoreElement = document.createElement("span");
 	this.scoreElement.setAttribute("class", "value");
-	this.scoreElement.innerText = 0;
+	this.scoreElement.innerHTML = "0";
 	scoreWrapper.appendChild(this.scoreElement);
 	this.infoWrapper.appendChild(scoreWrapper);
 	
@@ -99,7 +99,7 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	levelWrapper.innerHTML = "<span class='title'>Level:</span> ";
 	this.levelElement = document.createElement("span");
 	this.levelElement.setAttribute("class", "value");
-	this.levelElement.innerText = 1;
+	this.levelElement.innerHTML = "1";
 	levelWrapper.appendChild(this.levelElement);
 	this.infoWrapper.appendChild(levelWrapper);
 	
@@ -109,7 +109,7 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	linesWrapper.innerHTML = "<span class='title'>Lines:</span> ";
 	this.linesElement = document.createElement("span");
 	this.linesElement.setAttribute("class", "value");
-	this.linesElement.innerText = 0;
+	this.linesElement.innerHTML = "0";
 	linesWrapper.appendChild(this.linesElement);
 	this.infoWrapper.appendChild(linesWrapper);
 };
@@ -516,21 +516,21 @@ BlockDropGame.prototype.showDialog = function(button)
 			this.startButton = document.createElement("div");
 			this.startButton.setAttribute("id", "button-start");
 			this.startButton.setAttribute("class", "button");
-			this.startButton.innerText = "Start";
+			this.startButton.innerHTML = "Start";
 			this.gameWrapper.appendChild(this.startButton);
 			break;
 		case "pause":
 			this.pauseButton = document.createElement("div");
 			this.pauseButton.setAttribute("id", "button-pause");
 			this.pauseButton.setAttribute("class", "button");
-			this.pauseButton.innerText = "Pause";
+			this.pauseButton.innerHTML = "Pause";
 			this.infoWrapper.appendChild(this.pauseButton);
 			break;
 		case "resume":
 			this.resumeButton = document.createElement("div");
 			this.resumeButton.setAttribute("id", "button-resume");
 			this.resumeButton.setAttribute("class", "button");
-			this.resumeButton.innerText = "Resume";
+			this.resumeButton.innerHTML = "Resume";
 			this.gameWrapper.appendChild(this.resumeButton);
 			break;
 		case "finish":

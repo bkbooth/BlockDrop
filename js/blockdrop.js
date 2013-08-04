@@ -688,26 +688,30 @@ BlockDropGame.prototype.setupEventListeners = function()
 	
 	window.addEventListener("keydown", function(event)
 	{
+		if (!that.isPlaying) {
+			return;
+		}
+		
 		var keyPressed = event.KeyCode || event.which;
 		//console.log(keyPressed);
 		
-		if (keyPressed == '37' || keyPressed == '65') {
-			// left key or 'a'
+		if (keyPressed == '37' || keyPressed == '65' || keyPressed == '72') {
+			// left key, 'a' or 'h'
 			//console.log("left");
 			that.moveLeftHandler();
 			event.preventDefault();
-		} else if (keyPressed == '39' || keyPressed == '68') {
-			// right key or 'd'
+		} else if (keyPressed == '39' || keyPressed == '68' || keyPressed == '76') {
+			// right key, 'd' or 'l'
 			//console.log("right");
 			that.moveRightHandler();
 			event.preventDefault();
-		} else if (keyPressed == '38' || keyPressed == '87') {
-			// up key or 'w'
+		} else if (keyPressed == '38' || keyPressed == '87' || keyPressed == '75') {
+			// up key, 'w' or 'k'
 			//console.log("up");
 			that.rotateHandler();
 			event.preventDefault();
-		} else if (keyPressed == '40' || keyPressed == '83') {
-			// down key or 's'
+		} else if (keyPressed == '40' || keyPressed == '83' || keyPressed == '74') {
+			// down key, 's' or 'j'
 			//console.log("down");
 			that.moveDownHandler();
 			event.preventDefault();

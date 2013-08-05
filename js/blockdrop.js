@@ -751,6 +751,7 @@ BlockDropGame.prototype.setupEventListeners = function()
 	window.addEventListener("touchstart", function(event) {
 		//console.log(event);
 		//console.log("start x: "+event.changedTouches[0].clientX+", y: "+event.changedTouches[0].clientY);
+		console.log("touchstart");
 		
 		if (!that.isPlaying) {
 			return;
@@ -761,9 +762,14 @@ BlockDropGame.prototype.setupEventListeners = function()
 		that.touchStartY = event.changedTouches[0].clientY;
 	});
 	
+	window.addEventListener("touchend", function(event) {
+		console.log("touchend");
+	});
+	
 	window.addEventListener("touchmove", function(event) {
 		//console.log(event);
 		//console.log("end x: "+event.changedTouches[0].clientX+", y: "+event.changedTouches[0].clientY);
+		console.log("touchmove");
 		
 		if (!that.isPlaying) {
 			return;

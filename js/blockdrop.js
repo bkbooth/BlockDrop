@@ -212,11 +212,13 @@ BlockDropGame.prototype.drawElements = function()
 };
 
 // Check if moving down will cause a collision with the bottom wall or other blocks
-BlockDropGame.prototype.canMoveDown = function()
+BlockDropGame.prototype.canMoveDown = function(piece)
 {
+	piece = piece || this.piece;
+	
 	// Offset 1 space down
 	var offsets = {
-		top: this.baseSize, // this needs to be px
+		top: this.baseSize,
 		left: 0
 	};
 	if (this.isIntersecting(this.piece, 'bottomWall', offsets)) {
@@ -226,28 +228,32 @@ BlockDropGame.prototype.canMoveDown = function()
 };
 
 // Check if moving left will cause a collision with the left wall or other blocks
-BlockDropGame.prototype.canMoveLeft = function()
+BlockDropGame.prototype.canMoveLeft = function(piece)
 {
+	piece = piece || this.piece;
+	
 	// Offset 1 space to the left
 	var offsets = {
 		top: 0,
-		left: -this.baseSize // this needs to be px
+		left: -this.baseSize
 	};
-	if (this.isIntersecting(this.piece, 'leftWall', offsets)) {
+	if (this.isIntersecting(piece, 'leftWall', offsets)) {
 		return false;
 	}
 	return true;
 };
 
 // Check if moving right will cause a collision with the right wall or other blocks
-BlockDropGame.prototype.canMoveRight = function()
+BlockDropGame.prototype.canMoveRight = function(piece)
 {
+	piece = piece || this.piece;
+	
 	// Offset 1 space to the right
 	var offsets = {
 		top: 0,
-		left: this.baseSize // this needs to be px
+		left: this.baseSize
 	};
-	if (this.isIntersecting(this.piece, 'rightWall', offsets)) {
+	if (this.isIntersecting(piece, 'rightWall', offsets)) {
 		return false;
 	}
 	return true;
@@ -258,7 +264,7 @@ BlockDropGame.prototype.canMoveRight = function()
 BlockDropGame.prototype.canRotate = function()
 {	
 	// Set the next rotation step
-	var tempPiece, tempRotate = this.piece.rotate + 90;
+	var tempPiece = null, tempRotate = this.piece.rotate + 90, testFail = null;
 	if (tempRotate >= 360) {
 		tempRotate = 0;
 	}
@@ -266,8 +272,11 @@ BlockDropGame.prototype.canRotate = function()
 	// Create a temporary piece with the next rotation step
 	tempPiece = document.createElement("div");
 	tempPiece.className = "piece-wrapper";
+	tempPiece.size = this.piece.size;
 	tempPiece.style.left = (this.piece.offsetLeft / this.baseSize) + "em";
 	tempPiece.style.top = (this.piece.offsetTop / this.baseSize) + "em";
+	tempPiece.style.zIndex = "-1";
+	this.gameWrapper.appendChild(tempPiece);
 	
 	// Add the blocks for the next rotation step
 	this.piece.blocksMap["rot"+tempRotate].forEach(function(offsets) {
@@ -279,10 +288,38 @@ BlockDropGame.prototype.canRotate = function()
 	});
 	
 	// Intersection test with no offsets
-	if (this.isIntersecting(tempPiece, 'leftWall', {left: 0, top: 0})) {
+	if (testFail = this.isIntersecting(tempPiece, 'all', {left: 0, top: 0})) {
+		
+		// If we're intersecting with the left or right wall,
+		// check if we can move 1 space in the opposite direction to allow the rotate
+		
+		//console.log(this.piece.rotate);
+		
+		/* var offset = 1;
+		if ( this.piece.size === 4 &&
+			((testFail === 'leftWall' && this.piece.rotate !== 270) ||
+			(testFail === 'rightWall' && this.piece.rotate !== 90)) ) {
+			offset = 2;
+		} */
+		
+		//console.log(testFail + ", offset: " + offset);
+		//console.log(testFail);
+		
+		if (testFail === 'leftWall' && this.canMoveRight(tempPiece)) {
+			this.piece.style.left = (this.piece.offsetLeft / this.baseSize) + 1 + "em";
+			this.gameWrapper.removeChild(tempPiece);
+			return true;
+		} else if (testFail === 'rightWall' && this.canMoveLeft(tempPiece)) {
+			this.piece.style.left = (this.piece.offsetLeft / this.baseSize) - 1 + "em";
+			this.gameWrapper.removeChild(tempPiece);
+			return true;
+		}
+		
+		this.gameWrapper.removeChild(tempPiece);
 		return false;
 	}
 	
+	this.gameWrapper.removeChild(tempPiece);
 	return true;
 };
 
@@ -292,36 +329,34 @@ BlockDropGame.prototype.isIntersecting = function(object, target, offsets)
 	// Get the blocks of the current piece
 	var objectBlocks = object.getElementsByClassName("piece-block");
 	
-	switch (target) {
-		case 'leftWall':
-			// Check if any of the piece blocks will be outside the left wall
-			for (var i = 0; i < objectBlocks.length; i++) {
-				if (object.offsetLeft + objectBlocks[i].offsetLeft + offsets.left < 0) {
-					return true;
-				}
+	// Check if any of the piece blocks will be outside the left wall
+	if (target === 'leftWall' || target === 'all') {
+		for (var i = 0; i < objectBlocks.length; i++) {
+			if (object.offsetLeft + objectBlocks[i].offsetLeft + offsets.left < 0) {
+				return 'leftWall';
 			}
-			break;
-		case 'rightWall':
-			// Check if any of the piece blocks will be outside the right wall
-			for (var i = 0; i < objectBlocks.length; i++) {
-				if (object.offsetLeft + objectBlocks[i].offsetLeft + objectBlocks[i].offsetWidth + offsets.left > this.baseSize * 10) {
-					return true;
-				}
-			}
-			break;
-		case 'bottomWall':
-			// Check if any of the piece blocks will be outside the bottom wall
-			for (var i = 0; i < objectBlocks.length; i++) {
-				if (object.offsetTop + objectBlocks[i].offsetTop + objectBlocks[i].offsetHeight + offsets.top > this.baseSize * 20) {
-					return true;
-				}
-			}
-			break;
-		default:
-			break;
+		}
 	}
 	
-	// Originally had this as another case, but we always want to compare to other blocks
+	// Check if any of the piece blocks will be outside the right wall
+	if (target === 'rightWall' || target === 'all') {
+		for (var i = 0; i < objectBlocks.length; i++) {
+			if (object.offsetLeft + objectBlocks[i].offsetLeft + objectBlocks[i].offsetWidth + offsets.left > this.baseSize * 10) {
+				return 'rightWall';
+			}
+		}
+	}
+	
+	// Check if any of the piece blocks will be outside the bottom wall
+	if (target === 'bottomWall' || target === 'all') {
+		for (var i = 0; i < objectBlocks.length; i++) {
+			if (object.offsetTop + objectBlocks[i].offsetTop + objectBlocks[i].offsetHeight + offsets.top > this.baseSize * 20) {
+				return 'bottomWall';
+			}
+		}
+	}
+	
+	// Always compare against all other blocks
 	if (this.checkAllBlocks(object, offsets)) {
 		return true;
 	}
@@ -754,13 +789,12 @@ BlockDropGame.prototype.setupEventListeners = function()
 				// right swipe
 				//console.log("swipe right");
 				that.moveRightHandler();
-				//event.preventDefault();
 			} else {
 				// left swipe
 				//console.log("swipe left");
 				that.moveLeftHandler();
-				//event.preventDefault();
 			}
+			event.preventDefault();
 		} else {
 			// vertical swipe
 			if (touchMoveY > 0) {
@@ -828,8 +862,9 @@ var PieceFactory =
 	
 	
 	// Create and return a new Tetris piece, can be random or a pre-defined piece.
-	create: function(pieceIndex)
+	create: function(pieceIndex, initRotate)
 	{
+		var initRotate = initRotate || "0";
 		// Use the passed index or randomly choose a piece blueprint to create from
 		if (!(typeof pieceIndex === "number" && pieceIndex >= 0 && pieceIndex <= this.pieces.length)) {
 			pieceIndex = Math.floor(Math.random() * this.pieces.length);
@@ -851,7 +886,7 @@ var PieceFactory =
 		newPiece.style.height = pieceBlueprint.size + "em";
 		
 		// Loop through the blocks defined in the piece blueprint
-		pieceBlueprint.blocks["rot0"].forEach(function(offsets) {
+		pieceBlueprint.blocks["rot"+initRotate].forEach(function(offsets) {
 			// Create and setup the block for the piece
 			var block = document.createElement("div");
 			block.className = "piece-block piece-" + pieceBlueprint.id;

@@ -145,7 +145,8 @@ BlockDropGame.prototype.init = function()
 // otherwise check for completed rows and then generate a new piece
 BlockDropGame.prototype.update = function()
 {
-	//console.log(this);
+	this._dropWaitId = null;
+	
 	if (this.canMoveDown()) {
 		this.piece.style.top = (this.piece.offsetTop / this.baseSize) + 1 + "em";
 	} else {
@@ -643,11 +644,20 @@ BlockDropGame.prototype.moveRightHandler = function() {
 
 // down key or swipe down handler
 BlockDropGame.prototype.moveDownHandler = function() {
-	//clearInterval(that._intervalId);
+	clearInterval(this._intervalId);
+	
 	if (this.canMoveDown()) {
 		this.piece.style.top = (this.piece.offsetTop / this.baseSize) + 1 + "em";
+	} else {
+		// if we can't move down, start a timer to trigger a game update
+		if (this._dropWaitId === null) {
+			this._dropWaitId = setTimeout(this.update.bind(this), 500 / this.level);
+		} else {
+			return;
+		}
 	}
-	//that._intervalId = setInterval(that.update.bind(that), 1000 / that.level);
+	
+	this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
 };
 
 // up key or swipe up handler

@@ -4,7 +4,8 @@ body {
 	padding: 0;
 	
 	background: #333;
-	font-family: 'robotolocalcopy','Roboto',sans-serif;
+	/* font-family: 'robotolocalcopy','Roboto',sans-serif; */
+	font-family: 'Roboto',sans-serif;
 	
 	/* set the base font size as 10px in html,
 	 * can now resize the whole game board by
@@ -80,7 +81,7 @@ body {
 	cursor: pointer;
 
 	text-align: center;
-	font-weight: 200;
+	font-weight: 100;
 	
 	background: #428bca;
 	color: white;
@@ -136,7 +137,7 @@ body {
 
 .dialog p {
 	font-size: 0.5em;
-	font-weight: 200em;
+	font-weight: 400;
 	margin: 0 0 0.7em;
 }
 .dialog p:first-child {
@@ -161,7 +162,7 @@ body {
 	line-height: 0.6em;
 	
 	text-align: center;
-	font-weight: 200;
+	font-weight: 400;
 	
 	background: #ca4242;
 	color: white;

@@ -13,30 +13,31 @@ body {
 	font-size: 10px;
 }
 
-h1 {
-	text-align: center;
-}
-
 #game-wrapper {
+	position: relative;
+	background: black;
+	
 	width: 16.5em;
 	height: 21em;
 	margin: 0 auto;
-	position: relative;
-	background: black;
 }
 
 #game-board {
+	position: absolute;
+	left: 0.5em;
+	top: 0.5em;
+	
 	background: darkgray;
 	
 	width: 10em;
 	height: 20em;
 	overflow: hidden;
-	
-	position: absolute;
-	left: 0.5em;
-	top: 0.5em;
 }
 #game-info {
+	position: absolute;
+	right: 0;
+	top: 0;
+	
 	background: black;
 	color: white;
 	
@@ -46,10 +47,6 @@ h1 {
 	width: 6em;
 	height: 21em;
 	padding: 1em;
-	
-	position: absolute;
-	right: 0;
-	top: 0;
 }
 
 #game-level, #game-score, #game-lines, #game-next {
@@ -69,12 +66,13 @@ h1 {
 	font-weight: 900;
 }
 #game-info .container {
-	float: right;
+	position: relative;
+	background: #333;
+	
 	display: block;
+	float: right;
 	width: 4em;
 	height: 4em;
-	background: #333;
-	position: relative;
 }
 
 .button {
@@ -92,14 +90,17 @@ h1 {
 .button:hover {
 	background: #357ebd;
 }
-#button-start, #button-resume {
+#button-start, #button-about, #button-resume {
 	left: 2.5em;
-	top: 9em;
 	
 	width: 5em;
 	height: 2em;
 	line-height: 2em;
 }
+#button-start { top: 7.75em; }
+#button-about { top: 10.25em; }
+#button-resume { top: 9em; }
+
 #button-pause {
 	right: 1em;
 	bottom: 1em;
@@ -111,18 +112,44 @@ h1 {
 
 .dialog {
 	position: absolute;
-	left: 1em;
-	top: 7.5em;
-	
-	width: 6.4em;
 	padding: 0.8em;
+	z-index: 100;
+	
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
 	
 	background: white;
 	border-radius: 0.1em;
 }
-.dialog div:first-child {
-	font-size: 0.7em;
+#dialog-finish {
+	left: 1em;
+	top: 7.5em;
+	width: 8em;
 }
+#dialog-info {
+	left: 1.5em;
+	top: 1.5em;
+	
+	width: 13.5em;
+}
+
+.dialog p {
+	font-size: 0.5em;
+	font-weight: 200em;
+	margin: 0 0 0.7em;
+}
+.dialog p:first-child {
+	font-size: 0.8em;
+	font-weight: 100;
+}
+.dialog a {
+	color: #428bca;
+}
+.dialog a:hover {
+	color: #357ebd;
+}
+
 .dialog .close-button {
 	position: absolute;
 	right: 0.25em;
@@ -139,10 +166,23 @@ h1 {
 	background: #ca4242;
 	color: white;
 	border-radius: 0.1em;
-	z-index: 100;
+	z-index: 101;
 }
 .dialog .close-button:hover {
 	background: #b03a3a;
+}
+span.key {
+	display: inline-block;
+	background: #999;
+	color: white;
+	border-radius: 0.2em;
+	
+	width: 1.5em;
+	height: 1.5em;
+	line-height: 1.5em;
+	text-align: center;
+	
+	font-weight: 900;
 }
 
 .piece-wrapper {
@@ -150,61 +190,56 @@ h1 {
 }
 
 .piece-block {
+	position: absolute;
+	width: 1em;
+	height: 1em;
+	
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
-	width: 1em;
-	height: 1em;
+	
 	border: 0.1333em outset;
 	border-radius: 0.1em;
-	position: absolute;
 }
 
-/* O/square piece */
+/* O/square piece - yellow */
 .piece-o.piece-block {
-	/* yellow */
 	background: #e4de00;
 	border-color: #bdb700;
 }
 
-/* L piece */
+/* L piece - orange */
 .piece-l.piece-block {
-	/* orange */
 	background: #e46200;
 	border-color: #bd4e00;
 }
 
-/* J piece */
+/* J piece - blue */
 .piece-j.piece-block {
-	/* blue */
 	background: #004ee4;
 	border-color: #0041bd;
 }
 
-/* S piece */
+/* S piece - green */
 .piece-s.piece-block {
-	/* green */
 	background: #00e427;
 	border-color: #00aa20;
 }
 
-/* Z piece */
+/* Z piece - red */
 .piece-z.piece-block {
-	/* red */
 	background: #e40027;
 	border-color: #b00020;
 }
 
-/* T piece */
+/* T piece - purple */
 .piece-t.piece-block {
-	/* purple */
 	background: #9c13e4;
 	border-color: #8200bd;
 }
 
-/* I/long piece */
+/* I/long piece - cyan */
 .piece-i.piece-block {
-	/* cyan */
 	background: #00e4e4;
 	border-color: #00bdbd;
 }

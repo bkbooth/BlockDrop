@@ -32,16 +32,19 @@ var BlockDropGame = function(targetElement)
 	
 	// dialogs
 	this.startButton = null;	// HTML element for the "Start" button
+	this.aboutButton = null;	// HTML element for the "About" button
 	this.pauseButton = null;	// HTML element for the "Pause" button
 	this.resumeButton = null;	// HTML element for the "Resume" button
+	this.infoDialog = null;		// HTML element for the "Info" dialog
 	this.finishDialog = null;	// HTML element for the "Game Over" dialog
 	
 	// load the UI and listeners
 	this.initialSetup(targetElement);
 	this.setupEventListeners();
 	
-	// show the start game button
+	// show the start game and about buttons
 	this.showDialog("start");
+	this.showDialog("about");
 };
 
 // First time setup, create all the elements
@@ -549,6 +552,13 @@ BlockDropGame.prototype.showDialog = function(dialog)
 			this.startButton.innerHTML = "Start";
 			this.gameWrapper.appendChild(this.startButton);
 			break;
+		case "about":
+			this.aboutButton = document.createElement("div");
+			this.aboutButton.setAttribute("id", "button-about");
+			this.aboutButton.setAttribute("class", "button");
+			this.aboutButton.innerHTML = "About";
+			this.gameWrapper.appendChild(this.aboutButton);
+			break;
 		case "pause":
 			this.pauseButton = document.createElement("div");
 			this.pauseButton.setAttribute("id", "button-pause");
@@ -563,11 +573,26 @@ BlockDropGame.prototype.showDialog = function(dialog)
 			this.resumeButton.innerHTML = "Resume";
 			this.gameWrapper.appendChild(this.resumeButton);
 			break;
+		case "info":
+			this.infoDialog = document.createElement("div");
+			this.infoDialog.setAttribute("id", "dialog-info");
+			this.infoDialog.setAttribute("class", "dialog");
+			this.infoDialog.innerHTML = "<p>About BlockDrop</p>";
+			this.infoDialog.innerHTML += "<p>BlockDrop is a shameless Tetris&reg; clone using pure JavaScript, HTML and CSS. I wrote it while teaching myself JavaScript.</p>";
+			this.infoDialog.innerHTML += "<p>Controls:<p>";
+			this.infoDialog.innerHTML += "<p><span class='key'>&#x25C0;</span> <span class='key'>a</span> <span class='key'>h</span> or swipe &larr;<br />moves the piece left</p>";
+			this.infoDialog.innerHTML += "<p><span class='key'>&#x25B6;</span> <span class='key'>d</span> <span class='key'>l</span> or swipe &rarr;<br />moves the piece right</p>";
+			this.infoDialog.innerHTML += "<p><span class='key'>&#x25BC;</span> <span class='key'>s</span> <span class='key'>j</span> or swipe &darr;<br />moves the piece down</p>";
+			this.infoDialog.innerHTML += "<p><span class='key'>&#x25B2;</span> <span class='key'>w</span> <span class='key'>k</span> swipe &uarr;, or single tap<br />rotates the piece 90&deg; clock-wise</p>";
+			this.infoDialog.innerHTML += "<p><br />Find me on GitHub: <a href='https://github.com/bkbooth' target='_blank'>bkbooth</a></p>";
+			this.infoDialog.innerHTML += "<div class='close-button'>x</div>";
+			this.gameWrapper.parentNode.appendChild(this.infoDialog);
+			break;
 		case "finish":
 			this.finishDialog = document.createElement("div");
 			this.finishDialog.setAttribute("id", "dialog-finish");
 			this.finishDialog.setAttribute("class", "dialog");
-			this.finishDialog.innerHTML = "<div>Game over!<br />Your score was: " + this.score + "</div>";
+			this.finishDialog.innerHTML = "<p>Game over!<br />Your score was: " + this.score + "</p>";
 			this.finishDialog.innerHTML += "<div class='close-button'>x</div>";
 			this.gameWrapper.appendChild(this.finishDialog);
 			break;
@@ -576,13 +601,15 @@ BlockDropGame.prototype.showDialog = function(dialog)
 	}
 };
 
-// hide the requested button, accepts string or object
+// hide the requested button or dialog, accepts a string or an object
 BlockDropGame.prototype.hideDialog = function(dialog)
 {
 	if (typeof dialog === "object" && (
 		dialog === this.startButton ||
+		dialog === this.aboutButton ||
 		dialog === this.pauseButton ||
 		dialog === this.resumeButton ||
+		dialog === this.infoDialog ||
 		dialog === this.finishDialog
 	)) {
 		dialog.parentNode.removeChild(dialog);
@@ -591,14 +618,20 @@ BlockDropGame.prototype.hideDialog = function(dialog)
 			case "start":
 				this.startButton.parentNode.removeChild(this.startButton);
 				break;
+			case "about":
+				this.aboutButton.parentNode.removeChild(this.aboutButton);
+				break;
 			case "pause":
 				this.pauseButton.parentNode.removeChild(this.pauseButton);
 				break;
 			case "resume":
 				this.resumeButton.parentNode.removeChild(this.resumeButton);
 				break;
+			case "info":
+				this.infoDialog.parentNode.removeChild(this.infoDialog);
+				break;
 			case "finish":
-				this.finishDialog.parentNode.removeChild(this.finishButton);
+				this.finishDialog.parentNode.removeChild(this.finishDialog);
 				break;
 			default:
 				break;
@@ -609,27 +642,29 @@ BlockDropGame.prototype.hideDialog = function(dialog)
 // clear the timer, hide the game board
 BlockDropGame.prototype.pauseGame = function()
 {
+	// clear the game timer and set the game state
 	clearTimeout(this._intervalId);
 	this.isPlaying = false;
 	
+	// hide all blocks
 	var allBlocks = this.gameWrapper.getElementsByClassName("piece-block");
 	for (var i = 0; i < allBlocks.length; i++) {
 		allBlocks[i].style.display = "none";
 	}
-	
 	this.nextPiece.style.display = "none";
 };
 
 // clear the timer, show the game board
 BlockDropGame.prototype.resumeGame = function()
 {
+	// show all blocks 
 	var allBlocks = this.gameWrapper.getElementsByClassName("piece-block");
 	for (var i = 0; i < allBlocks.length; i++) {
 		allBlocks[i].style.display = "block";
 	}
-	
 	this.nextPiece.style.display = "block";
 	
+	// set the game state and restart the timer
 	this.isPlaying = true;
 	this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
 };
@@ -692,78 +727,78 @@ BlockDropGame.prototype.rotateHandler = function()
 BlockDropGame.prototype.setupEventListeners = function()
 {
 	var that = this;
+	var wrapperElement = this.gameWrapper.parentNode;
 	
-	window.addEventListener("click", function(event)
+	wrapperElement.addEventListener("click", function(event)
 	{
-		//console.log(event);
 		if (event.target === that.startButton) {
 			// hide the button, show the pause button, start the game
 			that.hideDialog(that.startButton);
+			that.hideDialog(that.aboutButton);
 			that.showDialog("pause");
 			that.startGame();
-			
 			event.preventDefault();
+		} else if (event.target === that.aboutButton) {
+			// show the info dialog
+			that.showDialog("info");
+			event.preventDefault(); 
 		} else if (event.target === that.pauseButton) {
 			// hide the button, show the resume button, pause the game
 			that.hideDialog(that.pauseButton);
 			that.showDialog("resume");
 			that.pauseGame();
-			
 			event.preventDefault();
 		} else if (event.target === that.resumeButton) {
 			// hide the button, show the pause button, resume the game
 			that.hideDialog(that.resumeButton);
 			that.showDialog("pause");
 			that.resumeGame();
-			
+			event.preventDefault();
+		} else if (that.infoDialog && event.target === that.infoDialog.getElementsByClassName("close-button")[0]) {
+			// hide the dialog
+			that.hideDialog(that.infoDialog);
 			event.preventDefault();
 		} else if (that.finishDialog && event.target === that.finishDialog.getElementsByClassName("close-button")[0]) {
 			// hide the dialog, show the start button
 			that.hideDialog(that.finishDialog);
 			that.showDialog("start");
+			that.hideDialog("about");
+			event.preventDefault();
 		}
 	});
 	
+	// still needs to be window?
 	window.addEventListener("keydown", function(event)
 	{
+		// don't detect touch unless the game is playing
 		if (!that.isPlaying) {
 			return;
 		}
 		
 		var keyPressed = event.KeyCode || event.which;
-		//console.log(keyPressed);
 		
 		if (keyPressed == '37' || keyPressed == '65' || keyPressed == '72') {
 			// left key, 'a' or 'h'
-			//console.log("left");
 			that.moveLeftHandler();
 			event.preventDefault();
 		} else if (keyPressed == '39' || keyPressed == '68' || keyPressed == '76') {
 			// right key, 'd' or 'l'
-			//console.log("right");
 			that.moveRightHandler();
 			event.preventDefault();
 		} else if (keyPressed == '38' || keyPressed == '87' || keyPressed == '75') {
 			// up key, 'w' or 'k'
-			//console.log("up");
 			that.rotateHandler();
 			event.preventDefault();
 		} else if (keyPressed == '40' || keyPressed == '83' || keyPressed == '74') {
 			// down key, 's' or 'j'
-			//console.log("down");
 			that.moveDownHandler();
 			event.preventDefault();
 		}
-	
-		//BlockDropGame.draw();
 	});
 	
-	window.addEventListener("touchstart", function(event)
+	wrapperElement.addEventListener("touchstart", function(event)
 	{
-		//console.log(event);
-		//console.log("start x: "+event.changedTouches[0].clientX+", y: "+event.changedTouches[0].clientY);
-		//console.log("+touchstart+");
-		
+		// don't detect touch unless the game is playing
 		if (!that.isPlaying) {
 			return;
 		}
@@ -775,27 +810,23 @@ BlockDropGame.prototype.setupEventListeners = function()
 		that.touchBlocked = false;
 	});
 	
-	window.addEventListener("touchend", function(event)
+	wrapperElement.addEventListener("touchend", function(event)
 	{
-		//console.log(event);
-		//console.log("-touchend-");
-		
+		// don't detect touch unless the game is playing
 		if (!that.isPlaying) {
 			return;
 		}
 		
+		// event.preventDefault on the "touchmove" handler causes the "touchend" event to still fire
+		// so we need to detect if we've moved the piece during the touch event cycle
 		if (!that.touchMoved && event.target !== that.pauseButton) {
 			that.rotateHandler();
 			event.preventDefault();
 		}
 	});
 	
-	window.addEventListener("touchmove", function(event)
+	wrapperElement.addEventListener("touchmove", function(event)
 	{
-		//console.log(event);
-		//console.log("end x: "+event.changedTouches[0].clientX+", y: "+event.changedTouches[0].clientY);
-		//console.log("(touchmove) " + that.touchMoved);
-		
 		if (!that.isPlaying || that.touchBlocked) {
 			return;
 		}
@@ -813,28 +844,23 @@ BlockDropGame.prototype.setupEventListeners = function()
 			that.touchMoved = 'x';
 			if (touchMoveX > 0) {
 				// right swipe
-				//console.log("swipe right");
 				that.moveRightHandler();
 			} else {
 				// left swipe
-				//console.log("swipe left");
 				that.moveLeftHandler();
 			}
 			touchBlockTime = 40;
-			event.preventDefault();
+			event.preventDefault(); // allow to swipe and hold down
 		} else if (Math.abs(touchMoveX) <= Math.abs(touchMoveY) && that.touchMoved !== 'x') {
 			// vertical swipe
 			if (touchMoveY > 0) {
 				// down swipe
 				that.touchMoved = 'y';
-				//console.log("swipe down");
 				that.moveDownHandler();
 				event.preventDefault(); // allow to swipe and hold down
 			} else if (!that.touchMoved) {
 				// up swipe
-				//console.log("swipe up");
 				that.rotateHandler();
-				//event.preventDefault();
 			}
 			touchBlockTime = 5;
 		}

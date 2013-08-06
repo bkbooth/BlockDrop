@@ -8,31 +8,33 @@
 var BlockDropGame = function(targetElement)
 {
 	// gameplay variables
-	this.lines = 0;
-	this.score = 0;
-	this.level = 1;
-	this._intervalId = null;
-	this._dropWaitId = null;
-	this.piece = null;
-	this.nextPiece = null;
-	this.touchStartX = null;
-	this.touchStartY = null;
-	this.isPlaying = false;
+	this.lines = 0;				// the number of cleared lines
+	this.score = 0;				// the players score
+	this.level = 1;				// the level, increases every 10 lines, drop speed based on this
+	this._intervalId = null;	// the main game loop timer
+	this._dropWaitId = null;	// timer triggered when player is holding down until piece hits the bottom
+	this.piece = null;			// the currently moving piece
+	this.nextPiece = null;		// the next piece
+	this.touchStartX = null;	// x coordinate where the touch event started
+	this.touchStartY = null;	// y coordinate where the touch event started
+	this.touchMoved = false;	// records whether the piece has been moved during the touch event
+	this.touchBlocked = false;	// touch temporary blocked to reduce sensitivity / increase control
+	this.isPlaying = false;		// records the state of the game
 	
 	// layout variables
-	this.baseSize = 30;			// This is the base font size, can resize the whole board with this
-	this.gameWrapper = null;
-	this.infoWrapper = null;
-	this.scoreElement = null
-	this.levelElement = null;
-	this.linesElement = null;
-	this.nextElement = null;
+	this.baseSize = 30;			// the base font size, can resize the whole board with this
+	this.gameWrapper = null;	// the game board
+	this.infoWrapper = null;	// the info sidebar
+	this.scoreElement = null	// the HTML score output element
+	this.levelElement = null;	// the HTML level output element
+	this.linesElement = null;	// the HTML lines output element
+	this.nextElement = null;	// the HTML wrapper that holds the next piece
 	
 	// dialogs
-	this.startButton = null;
-	this.pauseButton = null;
-	this.resumeButton = null;
-	this.finishDialog = null;
+	this.startButton = null;	// HTML element for the "Start" button
+	this.pauseButton = null;	// HTML element for the "Pause" button
+	this.resumeButton = null;	// HTML element for the "Resume" button
+	this.finishDialog = null;	// HTML element for the "Game Over" dialog
 	
 	// load the UI and listeners
 	this.initialSetup(targetElement);
@@ -119,7 +121,7 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 };
 
 // Initialise a game, create an initial piece and start the timer
-BlockDropGame.prototype.init = function()
+BlockDropGame.prototype.startGame = function()
 {
 	// Create the initial piece
 	this.piece = this.gameWrapper.appendChild(PieceFactory.create());
@@ -135,6 +137,10 @@ BlockDropGame.prototype.init = function()
 	this.lines = 0;
 	this.level = 1;
 	this.drawElements();
+	this.touchStartX = null;
+	this.touchStartY = null;
+	this.touchMoved = false;
+	this.touchBlocked = false;
 	this.isPlaying = true;
 	
 	// Start the timer
@@ -629,21 +635,24 @@ BlockDropGame.prototype.resumeGame = function()
 };
 
 // left key or left swipe handler
-BlockDropGame.prototype.moveLeftHandler = function() {
+BlockDropGame.prototype.moveLeftHandler = function()
+{
 	if (this.canMoveLeft()) {
 		this.piece.style.left = (this.piece.offsetLeft / this.baseSize) - 1 + "em";
 	}
 };
 
 // right key or right swipe handler
-BlockDropGame.prototype.moveRightHandler = function() {
+BlockDropGame.prototype.moveRightHandler = function()
+{
 	if (this.canMoveRight()) {
 		this.piece.style.left = (this.piece.offsetLeft / this.baseSize) + 1 + "em";
 	}
 };
 
 // down key or swipe down handler
-BlockDropGame.prototype.moveDownHandler = function() {
+BlockDropGame.prototype.moveDownHandler = function()
+{
 	clearInterval(this._intervalId);
 	
 	if (this.canMoveDown()) {
@@ -661,7 +670,8 @@ BlockDropGame.prototype.moveDownHandler = function() {
 };
 
 // up key or swipe up handler
-BlockDropGame.prototype.rotateHandler = function() {
+BlockDropGame.prototype.rotateHandler = function()
+{
 	if (this.canRotate()) {
 		this.piece.rotate += 90;
 		if (this.piece.rotate >= 360) {
@@ -690,7 +700,7 @@ BlockDropGame.prototype.setupEventListeners = function()
 			// hide the button, show the pause button, start the game
 			that.hideDialog(that.startButton);
 			that.showDialog("pause");
-			that.init();
+			that.startGame();
 			
 			event.preventDefault();
 		} else if (event.target === that.pauseButton) {
@@ -748,10 +758,11 @@ BlockDropGame.prototype.setupEventListeners = function()
 		//BlockDropGame.draw();
 	});
 	
-	window.addEventListener("touchstart", function(event) {
+	window.addEventListener("touchstart", function(event)
+	{
 		//console.log(event);
 		//console.log("start x: "+event.changedTouches[0].clientX+", y: "+event.changedTouches[0].clientY);
-		console.log("touchstart");
+		//console.log("+touchstart+");
 		
 		if (!that.isPlaying) {
 			return;
@@ -760,30 +771,46 @@ BlockDropGame.prototype.setupEventListeners = function()
 		// set the location for the start of the touch
 		that.touchStartX = event.changedTouches[0].clientX;
 		that.touchStartY = event.changedTouches[0].clientY;
+		that.touchMoved = false;
+		that.touchBlocked = false;
 	});
 	
-	window.addEventListener("touchend", function(event) {
-		console.log("touchend");
-	});
-	
-	window.addEventListener("touchmove", function(event) {
+	window.addEventListener("touchend", function(event)
+	{
 		//console.log(event);
-		//console.log("end x: "+event.changedTouches[0].clientX+", y: "+event.changedTouches[0].clientY);
-		console.log("touchmove");
+		//console.log("-touchend-");
 		
 		if (!that.isPlaying) {
 			return;
 		}
 		
+		if (!that.touchMoved && event.target !== that.pauseButton) {
+			that.rotateHandler();
+			event.preventDefault();
+		}
+	});
+	
+	window.addEventListener("touchmove", function(event)
+	{
+		//console.log(event);
+		//console.log("end x: "+event.changedTouches[0].clientX+", y: "+event.changedTouches[0].clientY);
+		//console.log("(touchmove) " + that.touchMoved);
+		
+		if (!that.isPlaying || that.touchBlocked) {
+			return;
+		}
+
 		// calculate the move
 		var touchEndX = event.changedTouches[0].clientX;
 		var touchEndY = event.changedTouches[0].clientY;
 		var touchMoveX = touchEndX - that.touchStartX;
 		var touchMoveY = touchEndY - that.touchStartY;
+		var touchBlockTime = null; // want slower movements sideways than downwards
 		
 		// lets check what kind of movement
-		if (Math.abs(touchMoveX) > Math.abs(touchMoveY)) {
+		if (Math.abs(touchMoveX) > Math.abs(touchMoveY) && that.touchMoved !== 'y') {
 			// horizontal swipe
+			that.touchMoved = 'x';
 			if (touchMoveX > 0) {
 				// right swipe
 				//console.log("swipe right");
@@ -793,26 +820,33 @@ BlockDropGame.prototype.setupEventListeners = function()
 				//console.log("swipe left");
 				that.moveLeftHandler();
 			}
+			touchBlockTime = 40;
 			event.preventDefault();
-		} else {
+		} else if (Math.abs(touchMoveX) <= Math.abs(touchMoveY) && that.touchMoved !== 'x') {
 			// vertical swipe
 			if (touchMoveY > 0) {
 				// down swipe
+				that.touchMoved = 'y';
 				//console.log("swipe down");
 				that.moveDownHandler();
 				event.preventDefault(); // allow to swipe and hold down
-			} else {
+			} else if (!that.touchMoved) {
 				// up swipe
 				//console.log("swipe up");
 				that.rotateHandler();
 				//event.preventDefault();
 			}
+			touchBlockTime = 5;
 		}
+		
+		that.touchBlocked = true;
+		setTimeout(function() {
+			this.touchBlocked = false;
+		}.bind(that), touchBlockTime);
 	});
 };
 
-var PieceFactory =
-{
+var PieceFactory = {
 	// Define our pieces here
 	pieces: [
 		{ id: "o", size: 2, blocks: { // O/square piece

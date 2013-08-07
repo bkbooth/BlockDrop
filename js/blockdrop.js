@@ -11,6 +11,7 @@ var BlockDropGame = function(targetElement)
 	this.lines = 0;				// the number of cleared lines
 	this.score = 0;				// the players score
 	this.level = 1;				// the level, increases every 10 lines, drop speed based on this
+	this.dropLength = 0;		// measure how long the player hard or soft drops the piece continuously
 	this._intervalId = null;	// the main game loop timer
 	this._dropWaitId = null;	// timer triggered when player is holding down until piece hits the bottom
 	this.piece = null;			// the currently moving piece
@@ -164,6 +165,7 @@ BlockDropGame.prototype.update = function()
 	
 	if (this.canMoveDown()) {
 		this.piece.style.top = (this.piece.offsetTop / this.baseSize) + 1 + "em";
+		this.dropLength = 0;
 	} else {
 		clearInterval(this._intervalId);
 		
@@ -542,6 +544,8 @@ BlockDropGame.prototype.incrementScore = function(numRows)
 		default:
 			break;
 	}
+	this.score += this.dropLength;
+	this.dropLength = 0;
 };
 
 // show the requested button
@@ -740,13 +744,13 @@ BlockDropGame.prototype.moveDownHandler = function()
 	
 	if (this.canMoveDown()) {
 		this.piece.style.top = (this.piece.offsetTop / this.baseSize) + 1 + "em";
+		this.dropLength++;
 	} else {
 		// if we can't move down, start a timer to trigger a game update
 		if (this._dropWaitId === null) {
 			this._dropWaitId = setTimeout(this.update.bind(this), 500 / this.level);
-		} else {
-			return;
-		}
+		} 
+		return;
 	}
 	
 	this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);

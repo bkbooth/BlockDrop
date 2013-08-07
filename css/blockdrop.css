@@ -90,6 +90,9 @@ body {
 .button:hover {
 	background: #357ebd;
 }
+.button.hl-first:first-letter {
+	background: rgba(255,255,255,0.15);
+}
 #button-start, #button-about,
 #button-resume, #button-quit {
 	left: 2.5em;

@@ -834,6 +834,15 @@ BlockDropGame.prototype.setupEventListeners = function()
 		var keyPressed = event.KeyCode || event.which;
 		//console.log(keyPressed);
 		
+		if (keyPressed === 18) {
+			// alt key pressed, highlight first letter of buttons
+			var buttons = that.gameWrapper.parentNode.getElementsByClassName("button");
+			for (var i = 0; i < buttons.length; i++) {
+				buttons[i].setAttribute("class", "button hl-first");
+			}
+			event.preventDefault();
+		}
+		
 		// split the touch controls into game and menu controls
 		if (that.isPlaying) {
 			// game is playing
@@ -919,6 +928,20 @@ BlockDropGame.prototype.setupEventListeners = function()
 					event.preventDefault();
 					break;
 			}
+		}
+	});
+	
+	window.addEventListener("keyup", function(event)
+	{
+		var keyPressed = event.KeyCode || event.which;
+		
+		if (keyPressed === 18) {
+			// alt key released, undo highlight first letter of buttons
+			var buttons = that.gameWrapper.parentNode.getElementsByClassName("button");
+			for (var i = 0; i < buttons.length; i++) {
+				buttons[i].setAttribute("class", "button");
+			}
+			event.preventDefault();
 		}
 	});
 	

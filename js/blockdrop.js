@@ -20,6 +20,7 @@ var BlockDropGame = function(targetElement)
 	this.touchStartY = null;	// y coordinate where the touch event started
 	this.touchMoved = false;	// records whether the piece has been moved during the touch event
 	this.touchBlocked = false;	// touch temporary blocked to reduce sensitivity / increase control
+	this.hardDropped = false;	// prevent rotating or moving after a hard drop
 	this.isPlaying = false;		// records the state of the game
 	
 	// layout variables
@@ -162,6 +163,7 @@ BlockDropGame.prototype.startGame = function()
 BlockDropGame.prototype.update = function()
 {
 	this._dropWaitId = null;
+	this.hardDropped = false;
 	
 	if (this.canMoveDown()) {
 		this.piece.style.top = (this.piece.offsetTop / this.baseSize) + 1 + "em";
@@ -592,13 +594,14 @@ BlockDropGame.prototype.showDialog = function(dialog)
 			this.infoDialog.setAttribute("id", "dialog-info");
 			this.infoDialog.setAttribute("class", "dialog");
 			this.infoDialog.innerHTML = "<p>About BlockDrop</p>";
-			this.infoDialog.innerHTML += "<p>BlockDrop is a shameless Tetris&reg; clone using pure JavaScript, HTML and CSS. I wrote it while teaching myself JavaScript.</p>";
+			this.infoDialog.innerHTML += "<p>BlockDrop is a shameless Tetris&reg; clone using pure JavaScript, HTML and CSS. I started writing it while teaching myself how to use JavaScript as a proper language and wean myself off jQuery. I'm also using it as a testing platform for various JavaScript, HTML5 and CSS3 features. I've tested in Chrome, Firefox, IE 9/10 and Chrome for Android so it should work on most modern platforms.</p>";
 			this.infoDialog.innerHTML += "<p>Controls:<p>";
 			this.infoDialog.innerHTML += "<p><span class='key'>&#x25C0;</span> <span class='key'>a</span> <span class='key'>h</span> or swipe &larr;<br />moves the piece left</p>";
 			this.infoDialog.innerHTML += "<p><span class='key'>&#x25B6;</span> <span class='key'>d</span> <span class='key'>l</span> or swipe &rarr;<br />moves the piece right</p>";
-			this.infoDialog.innerHTML += "<p><span class='key'>&#x25BC;</span> <span class='key'>s</span> <span class='key'>j</span> or swipe &darr;<br />moves the piece down</p>";
 			this.infoDialog.innerHTML += "<p><span class='key'>&#x25B2;</span> <span class='key'>w</span> <span class='key'>k</span> swipe &uarr;, or single tap<br />rotates the piece 90&deg; clock-wise</p>";
-			this.infoDialog.innerHTML += "<p><br />Find me on GitHub: <a href='https://github.com/bkbooth' target='_blank'>bkbooth</a></p>";
+			this.infoDialog.innerHTML += "<p><span class='key'>&#x25BC;</span> <span class='key'>s</span> <span class='key'>j</span> or swipe &darr;<br />soft drops the piece (drop line by line)</p>";
+			this.infoDialog.innerHTML += "<p><span class='key key-long'>spacebar</span> or <span class='key key-long'>&crarr; enter</span><br />hard drops the piece (drop all the way to the bottom)</p>";
+			this.infoDialog.innerHTML += "<p><br />GitHub: view the <a href='https://github.com/bkbooth/BlockDrop' target='_blank'>source code</a> or <a href='https://github.com/bkbooth' target='_blank'>find me</a></p>";
 			this.infoDialog.innerHTML += "<div class='close-button'>x</div>";
 			this.gameWrapper.parentNode.appendChild(this.infoDialog);
 			break;
@@ -762,6 +765,8 @@ BlockDropGame.prototype.hardDropHandler = function()
 	while (this._dropWaitId === null) {
 		this.moveDownHandler();
 	}
+	// force an update straight away after hard drop
+	this.hardDropped = true;
 }
 
 // up key or swipe up handler
@@ -844,7 +849,7 @@ BlockDropGame.prototype.setupEventListeners = function()
 		}
 		
 		// split the touch controls into game and menu controls
-		if (that.isPlaying) {
+		if (that.isPlaying && !that.hardDropped) {
 			// game is playing
 			switch (keyPressed) {
 				case 37:	// left key
@@ -882,7 +887,7 @@ BlockDropGame.prototype.setupEventListeners = function()
 					event.preventDefault();
 					break;
 			}
-		} else {
+		} else if (!that.isPlaying) {
 			// game not playing
 			switch (keyPressed) {
 				case 13:	// enter key

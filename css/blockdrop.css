@@ -138,7 +138,7 @@ body {
 }
 
 .dialog p {
-	font-size: 0.5em;
+	font-size: 0.45em;
 	font-weight: 400;
 	margin: 0 0 0.7em;
 }
@@ -185,7 +185,11 @@ span.key {
 	line-height: 1.5em;
 	text-align: center;
 	
-	font-weight: 900;
+	font-weight: normal;
+}
+span.key-long {
+	width: auto;
+	padding: 0 0.5em;
 }
 
 .piece-wrapper {

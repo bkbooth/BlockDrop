@@ -35,6 +35,7 @@ var BlockDropGame = function(targetElement)
 	this.aboutButton = null;	// HTML element for the "About" button
 	this.pauseButton = null;	// HTML element for the "Pause" button
 	this.resumeButton = null;	// HTML element for the "Resume" button
+	this.quitButton = null;		// HTML element for the "Quit" button
 	this.infoDialog = null;		// HTML element for the "Info" dialog
 	this.finishDialog = null;	// HTML element for the "Game Over" dialog
 	
@@ -146,6 +147,11 @@ BlockDropGame.prototype.startGame = function()
 	this.touchBlocked = false;
 	this.isPlaying = true;
 	
+	// show/hide the relevant dialogs
+	this.hideDialog("start");
+	this.hideDialog("about");
+	this.showDialog("pause");
+	
 	// Start the timer
 	this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
 };
@@ -192,10 +198,7 @@ BlockDropGame.prototype.update = function()
 		this.nextPiece.style.top = ((4 - this.nextPiece.size) / 2) + "em";
 		
 		if (this.isGameOver()) {
-			this.isPlaying = false;
-			this.clearGameBoard();
-			this.hideDialog(this.pauseButton);
-			this.showDialog("finish");
+			this.finishGame(false);
 		} else {
 			this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
 		}
@@ -573,6 +576,13 @@ BlockDropGame.prototype.showDialog = function(dialog)
 			this.resumeButton.innerHTML = "Resume";
 			this.gameWrapper.appendChild(this.resumeButton);
 			break;
+		case "quit":
+			this.quitButton = document.createElement("div");
+			this.quitButton.setAttribute("id", "button-quit");
+			this.quitButton.setAttribute("class", "button");
+			this.quitButton.innerHTML = "Quit";
+			this.gameWrapper.appendChild(this.quitButton);
+			break;
 		case "info":
 			this.infoDialog = document.createElement("div");
 			this.infoDialog.setAttribute("id", "dialog-info");
@@ -609,6 +619,7 @@ BlockDropGame.prototype.hideDialog = function(dialog)
 		dialog === this.aboutButton ||
 		dialog === this.pauseButton ||
 		dialog === this.resumeButton ||
+		dialog === this.quitButton ||
 		dialog === this.infoDialog ||
 		dialog === this.finishDialog
 	)) {
@@ -617,21 +628,31 @@ BlockDropGame.prototype.hideDialog = function(dialog)
 		switch (dialog) {
 			case "start":
 				this.startButton.parentNode.removeChild(this.startButton);
+				this.startButton = null;
 				break;
 			case "about":
 				this.aboutButton.parentNode.removeChild(this.aboutButton);
+				this.aboutButton = null;
 				break;
 			case "pause":
 				this.pauseButton.parentNode.removeChild(this.pauseButton);
+				this.pauseButton = null;
 				break;
 			case "resume":
 				this.resumeButton.parentNode.removeChild(this.resumeButton);
+				this.resumeButton = null;
+				break;
+			case "quit":
+				this.quitButton.parentNode.removeChild(this.quitButton);
+				this.quitButton = null;
 				break;
 			case "info":
 				this.infoDialog.parentNode.removeChild(this.infoDialog);
+				this.infoDialog = null;
 				break;
 			case "finish":
 				this.finishDialog.parentNode.removeChild(this.finishDialog);
+				this.finishDialog = null;
 				break;
 			default:
 				break;
@@ -652,6 +673,11 @@ BlockDropGame.prototype.pauseGame = function()
 		allBlocks[i].style.display = "none";
 	}
 	this.nextPiece.style.display = "none";
+	
+	// show/hide the relevant dialogs
+	this.hideDialog("pause");
+	this.showDialog("resume");
+	this.showDialog("quit");
 };
 
 // clear the timer, show the game board
@@ -667,7 +693,29 @@ BlockDropGame.prototype.resumeGame = function()
 	// set the game state and restart the timer
 	this.isPlaying = true;
 	this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
+	
+	// show/hide the relevant dialogs
+	this.hideDialog("resume");
+	this.hideDialog("quit");
+	this.showDialog("pause");
 };
+
+// set the game state, clear the board and hide/show relevant dialogs
+BlockDropGame.prototype.finishGame = function(quit)
+{
+	this.isPlaying = false;
+	this.clearGameBoard();
+	
+	if (quit) {
+		this.hideDialog("resume");
+		this.hideDialog("quit");
+		this.showDialog("start");
+		this.showDialog("about");
+	} else {
+		this.hideDialog("pause");
+		this.showDialog("finish");
+	}
+}
 
 // left key or left swipe handler
 BlockDropGame.prototype.moveLeftHandler = function()
@@ -704,6 +752,14 @@ BlockDropGame.prototype.moveDownHandler = function()
 	this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
 };
 
+// hard drop drops the piece all the way to the bottom
+BlockDropGame.prototype.hardDropHandler = function()
+{
+	while (this._dropWaitId === null) {
+		this.moveDownHandler();
+	}
+}
+
 // up key or swipe up handler
 BlockDropGame.prototype.rotateHandler = function()
 {
@@ -732,37 +788,38 @@ BlockDropGame.prototype.setupEventListeners = function()
 	wrapperElement.addEventListener("click", function(event)
 	{
 		if (event.target === that.startButton) {
-			// hide the button, show the pause button, start the game
-			that.hideDialog(that.startButton);
-			that.hideDialog(that.aboutButton);
-			that.showDialog("pause");
+			// start the game
 			that.startGame();
 			event.preventDefault();
 		} else if (event.target === that.aboutButton) {
-			// show the info dialog
+			// hide the start and about buttons, show the info dialog
+			that.hideDialog("start");
+			that.hideDialog("about");
 			that.showDialog("info");
-			event.preventDefault(); 
+			event.preventDefault();
 		} else if (event.target === that.pauseButton) {
-			// hide the button, show the resume button, pause the game
-			that.hideDialog(that.pauseButton);
-			that.showDialog("resume");
+			// pause the game
 			that.pauseGame();
 			event.preventDefault();
 		} else if (event.target === that.resumeButton) {
-			// hide the button, show the pause button, resume the game
-			that.hideDialog(that.resumeButton);
-			that.showDialog("pause");
+			// resume the game
 			that.resumeGame();
 			event.preventDefault();
+		} else if (event.target === that.quitButton) {
+			// quit the game
+			that.finishGame(true);
+			event.preventDefault();
 		} else if (that.infoDialog && event.target === that.infoDialog.getElementsByClassName("close-button")[0]) {
-			// hide the dialog
-			that.hideDialog(that.infoDialog);
+			// hide the dialog, show the start and about buttons
+			that.hideDialog("info");
+			that.showDialog("start");
+			that.showDialog("about");
 			event.preventDefault();
 		} else if (that.finishDialog && event.target === that.finishDialog.getElementsByClassName("close-button")[0]) {
-			// hide the dialog, show the start button
-			that.hideDialog(that.finishDialog);
+			// hide the dialog, show the start and about buttons
+			that.hideDialog("finish");
 			that.showDialog("start");
-			that.hideDialog("about");
+			that.showDialog("about");
 			event.preventDefault();
 		}
 	});
@@ -770,29 +827,94 @@ BlockDropGame.prototype.setupEventListeners = function()
 	// still needs to be window?
 	window.addEventListener("keydown", function(event)
 	{
-		// don't detect touch unless the game is playing
-		if (!that.isPlaying) {
-			return;
-		}
-		
 		var keyPressed = event.KeyCode || event.which;
+		//console.log(keyPressed);
 		
-		if (keyPressed == '37' || keyPressed == '65' || keyPressed == '72') {
-			// left key, 'a' or 'h'
-			that.moveLeftHandler();
-			event.preventDefault();
-		} else if (keyPressed == '39' || keyPressed == '68' || keyPressed == '76') {
-			// right key, 'd' or 'l'
-			that.moveRightHandler();
-			event.preventDefault();
-		} else if (keyPressed == '38' || keyPressed == '87' || keyPressed == '75') {
-			// up key, 'w' or 'k'
-			that.rotateHandler();
-			event.preventDefault();
-		} else if (keyPressed == '40' || keyPressed == '83' || keyPressed == '74') {
-			// down key, 's' or 'j'
-			that.moveDownHandler();
-			event.preventDefault();
+		// split the touch controls into game and menu controls
+		if (that.isPlaying) {
+			// game is playing
+			switch (keyPressed) {
+				case 37:	// left key
+				case 72:	// 'h' key
+				case 65:	// 'a' key
+					that.moveLeftHandler();
+					event.preventDefault();
+					break;
+				case 39:	// right key
+				case 76:	// 'l' key
+				case 68:	// 'd' key
+					that.moveRightHandler();
+					event.preventDefault();
+					break;
+				case 38:	// up key
+				case 75:	// 'k' key
+				case 87:	// 'w' key
+					that.rotateHandler();
+					event.preventDefault();
+					break;
+				case 40:	// down key
+				case 74:	// 'j' key
+				case 83:	// 's' key
+					that.moveDownHandler();
+					event.preventDefault();
+					break;
+				case 13:	// enter key
+				case 32:	// space key
+					that.hardDropHandler();
+					event.preventDefault();
+					break;
+				case 27:	// esc key
+				case 80:	// 'p' key
+					that.pauseGame();
+					event.preventDefault();
+					break;
+			}
+		} else {
+			// game not playing
+			switch (keyPressed) {
+				case 13:	// enter key
+				case 32:	// space key
+					if (that.startButton) {
+						that.startGame();
+					} else if (that.resumeButton) {
+						that.resumeGame();
+					}
+					event.preventDefault();
+					break;
+				case 83:	// 's' key
+					if (that.startButton) { that.startGame(); }
+					event.preventDefault();
+					break;
+				case 65:	// 'a' key
+					if (that.aboutButton) {
+						that.hideDialog("start");
+						that.hideDialog("about");
+						that.showDialog("info");
+					}
+					event.preventDefault();
+					break;
+				case 82:	// 'r' key
+					if (that.resumeButton) { that.resumeGame(); }
+					event.preventDefault();
+					break;
+				case 81:	// 'q' key
+					if (that.quitButton) { that.finishGame(true); }
+					event.preventDefault();
+					break;
+				case 27:	// esc key
+				case 88:	// 'x' key
+					if (that.infoDialog) {
+						that.hideDialog("info");
+						that.showDialog("start");
+						that.showDialog("about");
+					} else if (that.finishDialog) {
+						that.hideDialog("finish");
+						that.showDialog("start");
+						that.showDialog("about");
+					}
+					event.preventDefault();
+					break;
+			}
 		}
 	});
 	

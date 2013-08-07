@@ -4,8 +4,7 @@ body {
 	padding: 0;
 	
 	background: #333;
-	/* font-family: 'robotolocalcopy','Roboto',sans-serif; */
-	font-family: 'Roboto',sans-serif;
+	font-family: /*'robotolocalcopy',*/'Roboto',sans-serif;
 	
 	/* set the base font size as 10px in html,
 	 * can now resize the whole game board by
@@ -47,7 +46,7 @@ body {
 	box-sizing: border-box;
 	width: 6em;
 	height: 21em;
-	padding: 1em;
+	padding: 0.5em 0.5em 0.5em 1em;
 }
 
 #game-level, #game-score, #game-lines, #game-next {
@@ -91,16 +90,16 @@ body {
 .button:hover {
 	background: #357ebd;
 }
-#button-start, #button-about, #button-resume {
+#button-start, #button-about,
+#button-resume, #button-quit {
 	left: 2.5em;
 	
 	width: 5em;
 	height: 2em;
 	line-height: 2em;
 }
-#button-start { top: 7.75em; }
-#button-about { top: 10.25em; }
-#button-resume { top: 9em; }
+#button-start, #button-resume { top: 7.75em; }
+#button-about, #button-quit { top: 10.25em; }
 
 #button-pause {
 	right: 1em;

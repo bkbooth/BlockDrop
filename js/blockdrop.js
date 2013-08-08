@@ -908,6 +908,10 @@ BlockDropGame.prototype.setupEventListeners = function()
 						that.hideDialog("start");
 						that.hideDialog("about");
 						that.showDialog("info");
+					} else if (that.infoDialog) {
+						that.hideDialog("info");
+						that.showDialog("start");
+						that.showDialog("about");
 					}
 					event.preventDefault();
 					break;

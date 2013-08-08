@@ -35,11 +35,19 @@ var BlockDropGame = function(targetElement)
 	// dialogs
 	this.startButton = null;	// HTML element for the "Start" button
 	this.aboutButton = null;	// HTML element for the "About" button
+	this.scoresButton = null;	// HTML element for the "High Scores" button
 	this.pauseButton = null;	// HTML element for the "Pause" button
 	this.resumeButton = null;	// HTML element for the "Resume" button
 	this.quitButton = null;		// HTML element for the "Quit" button
 	this.infoDialog = null;		// HTML element for the "Info" dialog
 	this.finishDialog = null;	// HTML element for the "Game Over" dialog
+	this.highScoresDialog = null; // HTML element for the "High Scores" dialog
+	this.scoreName = null;		// HTML element for the score name input field
+	
+	// setup localStorage stuff
+	this.numSavedScores = 0;
+	this.highScores = [];
+	this.loadScores();
 	
 	// load the UI and listeners
 	this.initialSetup(targetElement);
@@ -48,6 +56,7 @@ var BlockDropGame = function(targetElement)
 	// show the start game and about buttons
 	this.showDialog("start");
 	this.showDialog("about");
+	this.showDialog("scores");
 };
 
 // First time setup, create all the elements
@@ -152,6 +161,7 @@ BlockDropGame.prototype.startGame = function()
 	// show/hide the relevant dialogs
 	this.hideDialog("start");
 	this.hideDialog("about");
+	this.hideDialog("scores");
 	this.showDialog("pause");
 	
 	// Start the timer
@@ -553,6 +563,8 @@ BlockDropGame.prototype.incrementScore = function(numRows)
 // show the requested button
 BlockDropGame.prototype.showDialog = function(dialog)
 {
+	var tempHTML; // need to build up HTML before applying it to innerHTML
+	
 	switch (dialog) {
 		case "start":
 			this.startButton = document.createElement("div");
@@ -567,6 +579,13 @@ BlockDropGame.prototype.showDialog = function(dialog)
 			this.aboutButton.setAttribute("class", "button");
 			this.aboutButton.innerHTML = "About";
 			this.gameWrapper.appendChild(this.aboutButton);
+			break;
+		case "scores":
+			this.scoresButton = document.createElement("div");
+			this.scoresButton.setAttribute("id", "button-scores");
+			this.scoresButton.setAttribute("class", "button");
+			this.scoresButton.innerHTML = "High Scores";
+			this.gameWrapper.appendChild(this.scoresButton);
 			break;
 		case "pause":
 			this.pauseButton = document.createElement("div");
@@ -593,25 +612,58 @@ BlockDropGame.prototype.showDialog = function(dialog)
 			this.infoDialog = document.createElement("div");
 			this.infoDialog.setAttribute("id", "dialog-info");
 			this.infoDialog.setAttribute("class", "dialog");
-			this.infoDialog.innerHTML = "<p>About BlockDrop</p>";
-			this.infoDialog.innerHTML += "<p>BlockDrop is a shameless Tetris&reg; clone using pure JavaScript, HTML and CSS. I started writing it while teaching myself how to use JavaScript as a proper language and wean myself off jQuery. I'm also using it as a testing platform for various JavaScript, HTML5 and CSS3 features. I've tested in Chrome, Firefox, IE 9/10 and Chrome for Android so it should work on most modern platforms.</p>";
-			this.infoDialog.innerHTML += "<p>Controls:<p>";
-			this.infoDialog.innerHTML += "<p><span class='key'>&#x25C0;</span> <span class='key'>a</span> <span class='key'>h</span> or swipe &larr;<br />moves the piece left</p>";
-			this.infoDialog.innerHTML += "<p><span class='key'>&#x25B6;</span> <span class='key'>d</span> <span class='key'>l</span> or swipe &rarr;<br />moves the piece right</p>";
-			this.infoDialog.innerHTML += "<p><span class='key'>&#x25B2;</span> <span class='key'>w</span> <span class='key'>k</span> swipe &uarr;, or single tap<br />rotates the piece 90&deg; clock-wise</p>";
-			this.infoDialog.innerHTML += "<p><span class='key'>&#x25BC;</span> <span class='key'>s</span> <span class='key'>j</span> or swipe &darr;<br />soft drops the piece (drop line by line)</p>";
-			this.infoDialog.innerHTML += "<p><span class='key key-long'>spacebar</span> or <span class='key key-long'>&crarr; enter</span><br />hard drops the piece (drop all the way to the bottom)</p>";
-			this.infoDialog.innerHTML += "<p><br />GitHub: view the <a href='https://github.com/bkbooth/BlockDrop' target='_blank'>source code</a> or <a href='https://github.com/bkbooth' target='_blank'>find me</a></p>";
-			this.infoDialog.innerHTML += "<div class='close-button'>x</div>";
+			tempHTML = "<p>About BlockDrop</p>";
+			tempHTML += "<div class='close-button'>x</div>";
+			tempHTML += "<div class='inner-content'>";
+			tempHTML += "<p>BlockDrop is a shameless Tetris&reg; clone using pure JavaScript, HTML and CSS. ";
+			tempHTML += "I started writing it while teaching myself how to use JavaScript as a proper language and wean myself off jQuery. ";
+			tempHTML += "I'm also using it as a testing platform for various JavaScript, HTML5 and CSS3 features. ";
+			tempHTML += "I've tested in Chrome, Firefox, IE 9/10 and Chrome for Android so it should work on most modern platforms.</p>";
+			tempHTML += "<p>Controls:<p>";
+			tempHTML += "<p><span class='key'>&#x25C0;</span> <span class='key'>a</span> <span class='key'>h</span> or swipe &larr;<br />moves the piece left</p>";
+			tempHTML += "<p><span class='key'>&#x25B6;</span> <span class='key'>d</span> <span class='key'>l</span> or swipe &rarr;<br />moves the piece right</p>";
+			tempHTML += "<p><span class='key'>&#x25B2;</span> <span class='key'>w</span> <span class='key'>k</span> swipe &uarr;, or single tap<br />rotates the piece 90&deg; clock-wise</p>";
+			tempHTML += "<p><span class='key'>&#x25BC;</span> <span class='key'>s</span> <span class='key'>j</span> or swipe &darr;<br />soft drops the piece (drop line by line)</p>";
+			tempHTML += "<p><span class='key key-long'>spacebar</span> or <span class='key key-long'>&crarr; enter</span><br />hard drops the piece (drop all the way to the bottom)</p>";
+			tempHTML += "<p><br />GitHub: view the <a href='https://github.com/bkbooth/BlockDrop' target='_blank'>source code</a> or <a href='https://github.com/bkbooth' target='_blank'>find me</a></p>";
+			tempHTML += "</div>";
+			this.infoDialog.innerHTML = tempHTML;
 			this.gameWrapper.parentNode.appendChild(this.infoDialog);
 			break;
 		case "finish":
 			this.finishDialog = document.createElement("div");
 			this.finishDialog.setAttribute("id", "dialog-finish");
 			this.finishDialog.setAttribute("class", "dialog");
+			tempHTML = "<p>Game Over!</p>";
+			tempHTML += "<div class='close-button'>x</div>";
+			tempHTML += "<div class='inner-content'>";
+			tempHTML += "<p>Your score was:<br /><span class='score'>" + this.score + "</span></p>";
+			tempHTML += "<p>Enter your name below to save the high score:</p>";
+			tempHTML += "<input id='score_name' placeholder='Your name...' />";
+			tempHTML += "</div>";
 			this.finishDialog.innerHTML = "<p>Game over!<br />Your score was: " + this.score + "</p>";
 			this.finishDialog.innerHTML += "<div class='close-button'>x</div>";
+			this.finishDialog.innerHTML = tempHTML;
 			this.gameWrapper.appendChild(this.finishDialog);
+			this.scoreName = document.getElementById("score_name");
+			this.scoreName.focus();
+			break;
+		case "scores-dialog":
+			this.highScoresDialog = document.createElement("div");
+			this.highScoresDialog.setAttribute("id", "dialog-scores");
+			this.highScoresDialog.setAttribute("class", "dialog");
+			tempHTML = "<p>Local High Scores</p>";
+			tempHTML += "<div class='close-button'>x</div>";
+			tempHTML += "<div class='inner-content'>";
+			tempHTML += "<table><thead><tr><th>&nbsp</th><th>Score</th><th>Player</th></tr></thead><tbody>";
+			for (var i = 0; i < this.highScores.length; i++) {
+				tempHTML += "</tr><th>" + (i + 1) + "</th>";
+				tempHTML += "<td>" + this.highScores[i].score + "</td>";
+				tempHTML += "<td>" + this.highScores[i].name + "</td></tr>";
+			}
+			tempHTML += "</tbody></table></div>";
+			this.highScoresDialog.innerHTML = tempHTML;
+			this.gameWrapper.parentNode.appendChild(this.highScoresDialog);
 			break;
 		default:
 			break;
@@ -624,11 +676,13 @@ BlockDropGame.prototype.hideDialog = function(dialog)
 	if (typeof dialog === "object" && (
 		dialog === this.startButton ||
 		dialog === this.aboutButton ||
+		dialog === this.scoresButton ||
 		dialog === this.pauseButton ||
 		dialog === this.resumeButton ||
 		dialog === this.quitButton ||
 		dialog === this.infoDialog ||
-		dialog === this.finishDialog
+		dialog === this.finishDialog ||
+		dialog === this.highScoresDialog
 	)) {
 		dialog.parentNode.removeChild(dialog);
 	} else if (typeof dialog === "string") {
@@ -640,6 +694,10 @@ BlockDropGame.prototype.hideDialog = function(dialog)
 			case "about":
 				this.aboutButton.parentNode.removeChild(this.aboutButton);
 				this.aboutButton = null;
+				break;
+			case "scores":
+				this.scoresButton.parentNode.removeChild(this.scoresButton);
+				this.scoresButton = null;
 				break;
 			case "pause":
 				this.pauseButton.parentNode.removeChild(this.pauseButton);
@@ -660,6 +718,11 @@ BlockDropGame.prototype.hideDialog = function(dialog)
 			case "finish":
 				this.finishDialog.parentNode.removeChild(this.finishDialog);
 				this.finishDialog = null;
+				this.scoreName = null;
+				break;
+			case "scores-dialog":
+				this.highScoresDialog.parentNode.removeChild(this.highScoresDialog);
+				this.highScoresDialog = null;
 				break;
 			default:
 				break;
@@ -718,10 +781,46 @@ BlockDropGame.prototype.finishGame = function(quit)
 		this.hideDialog("quit");
 		this.showDialog("start");
 		this.showDialog("about");
+		this.showDialog("scores");
 	} else {
 		this.hideDialog("pause");
 		this.showDialog("finish");
 	}
+}
+
+// load the saved scores from localStorage
+BlockDropGame.prototype.loadScores = function() {
+	// get the number of saved scores
+	this.numSavedScores = parseInt(localStorage.getItem("blockdrop.numscores"), 10) || 0;
+	
+	// loop through loading scores from localStorage
+	for (var i = 0; i < this.numSavedScores; i++) {
+		this.highScores[i] = {};
+		this.highScores[i].name = localStorage.getItem("blockdrop.scores." + i + ".name");
+		this.highScores[i].score = parseInt(localStorage.getItem("blockdrop.scores." + i + ".score"), 10);
+	}
+}
+
+// save the users input name with their score
+BlockDropGame.prototype.saveScore = function() {
+	// update and sort the saved scores object array
+	this.highScores[this.numSavedScores] = {};
+	this.highScores[this.numSavedScores].name = this.scoreName.value;
+	this.highScores[this.numSavedScores].score = this.score;
+	this.highScores.sort(this.scoreCompare);
+	
+	// increment the number of saved scores (max 20)
+	this.numSavedScores++;
+	if (this.numSavedScores > 20) {
+		this.numSavedScores = 20;
+	}
+	
+	// loop through and save all of the scores back to localStorage
+	for (var i = 0; i < this.numSavedScores; i++) {
+		localStorage.setItem("blockdrop.scores." + i + ".name", this.highScores[i].name);
+		localStorage.setItem("blockdrop.scores." + i + ".score", this.highScores[i].score);
+	}
+	localStorage.setItem("blockdrop.numscores", this.numSavedScores);
 }
 
 // left key or left swipe handler
@@ -788,6 +887,18 @@ BlockDropGame.prototype.rotateHandler = function()
 	}
 };
 
+// compare two score objects
+BlockDropGame.prototype.scoreCompare = function(a, b)
+{
+	if (a.score < b.score) {
+		return 1;
+	} else if (a.score > b.score) {
+		return -1;
+	} else {
+		return 0;
+	}
+}
+
 // Setup the event listeners
 BlockDropGame.prototype.setupEventListeners = function()
 {
@@ -804,7 +915,15 @@ BlockDropGame.prototype.setupEventListeners = function()
 			// hide the start and about buttons, show the info dialog
 			that.hideDialog("start");
 			that.hideDialog("about");
+			that.hideDialog("scores");
 			that.showDialog("info");
+			event.preventDefault();
+		} else if (event.target === that.scoresButton) {
+			// hide the start and about buttons, show the high scores dialog
+			that.hideDialog("start");
+			that.hideDialog("about");
+			that.hideDialog("scores");
+			that.showDialog("scores-dialog");
 			event.preventDefault();
 		} else if (event.target === that.pauseButton) {
 			// pause the game
@@ -823,12 +942,21 @@ BlockDropGame.prototype.setupEventListeners = function()
 			that.hideDialog("info");
 			that.showDialog("start");
 			that.showDialog("about");
+			that.showDialog("scores");
 			event.preventDefault();
 		} else if (that.finishDialog && event.target === that.finishDialog.getElementsByClassName("close-button")[0]) {
 			// hide the dialog, show the start and about buttons
 			that.hideDialog("finish");
 			that.showDialog("start");
 			that.showDialog("about");
+			that.showDialog("scores");
+			event.preventDefault();
+		} else if (that.highScoresDialog && event.target === that.highScoresDialog.getElementsByClassName("close-button")[0]) {
+			// hide the dialog, show the start and about buttons
+			that.hideDialog("scores-dialog");
+			that.showDialog("start");
+			that.showDialog("about");
+			that.showDialog("scores");
 			event.preventDefault();
 		}
 	});
@@ -838,6 +966,19 @@ BlockDropGame.prototype.setupEventListeners = function()
 	{
 		var keyPressed = event.KeyCode || event.which;
 		//console.log(keyPressed);
+		//console.log(event);
+		
+		if (that.scoreName && event.target === that.scoreName && event.keyCode !== 27) {
+			// when the user is inputting their name, only allow escape to flow
+			// through to the rest of the event handler
+			if (event.keyCode === 13) {
+				// enter key pressed
+				that.saveScore();
+				that.hideDialog("finish");
+				that.showDialog("scores-dialog");
+			}
+			return;
+		}
 		
 		if (keyPressed === 18) {
 			// alt key pressed, highlight first letter of buttons
@@ -907,11 +1048,27 @@ BlockDropGame.prototype.setupEventListeners = function()
 					if (that.aboutButton) {
 						that.hideDialog("start");
 						that.hideDialog("about");
+						that.hideDialog("scores");
 						that.showDialog("info");
 					} else if (that.infoDialog) {
 						that.hideDialog("info");
 						that.showDialog("start");
 						that.showDialog("about");
+						that.showDialog("scores");
+					}
+					event.preventDefault();
+					break;
+				case 72:	// 'h' key
+					if (that.scoresButton) {
+						that.hideDialog("start");
+						that.hideDialog("about");
+						that.hideDialog("scores");
+						that.showDialog("scores-dialog");
+					} else if (that.highScoresDialog) {
+						that.hideDialog("scores-dialog");
+						that.showDialog("start");
+						that.showDialog("about");
+						that.showDialog("scores");
 					}
 					event.preventDefault();
 					break;
@@ -929,10 +1086,17 @@ BlockDropGame.prototype.setupEventListeners = function()
 						that.hideDialog("info");
 						that.showDialog("start");
 						that.showDialog("about");
+						that.showDialog("scores");
 					} else if (that.finishDialog) {
 						that.hideDialog("finish");
 						that.showDialog("start");
 						that.showDialog("about");
+						that.showDialog("scores");
+					} else if (that.highScoresDialog) {
+						that.hideDialog("scores-dialog");
+						that.showDialog("start");
+						that.showDialog("about");
+						that.showDialog("scores");
 					}
 					event.preventDefault();
 					break;

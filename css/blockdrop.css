@@ -94,15 +94,19 @@ body {
 	background: rgba(255,255,255,0.15);
 }
 #button-start, #button-about,
-#button-resume, #button-quit {
-	left: 2.5em;
+#button-resume, #button-quit,
+#button-scores {
+	left: 1.5em;
 	
-	width: 5em;
+	width: 7em;
 	height: 2em;
 	line-height: 2em;
 }
-#button-start, #button-resume { top: 7.75em; }
-#button-about, #button-quit { top: 10.25em; }
+#button-start { top: 6.5em; }
+#button-about { top: 9em; }
+#button-scores { top: 11.5em; }
+#button-resume { top: 7.75em; }
+#button-quit { top: 10.25em; }
 
 #button-pause {
 	right: 1em;
@@ -127,30 +131,56 @@ body {
 }
 #dialog-finish {
 	left: 1em;
-	top: 7.5em;
+	top: 5.5em;
 	width: 8em;
 }
-#dialog-info {
+#dialog-info,
+#dialog-scores {
 	left: 1.5em;
 	top: 1.5em;
-	
 	width: 13.5em;
 }
 
-.dialog p {
-	font-size: 0.45em;
-	font-weight: 400;
-	margin: 0 0 0.7em;
-}
-.dialog p:first-child {
+.dialog > p {
 	font-size: 0.8em;
 	font-weight: 100;
+	margin: 0 0 0.7em;
+}
+.dialog .inner-content {
+	font-size: 0.45em;
+	font-weight: 400;
+	max-height: 33em;
+	overflow-y: auto;
+}
+.dialog .inner-content p {
+	margin: 0 0 0.7em;
+}
+.dialog .score {
+	font-size: 2em;
+	font-weight: 900;
 }
 .dialog a {
 	color: #428bca;
 }
 .dialog a:hover {
 	color: #357ebd;
+}
+.dialog table {
+	border: none;
+	width: 100%;
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+.dialog th,
+.dialog td {
+	border: 1px solid black;
+}
+.dialog input {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	width: 100%;
+	font-size: 1.8em;
 }
 
 .dialog .close-button {

@@ -1,0 +1,24 @@
+CACHE MANIFEST
+
+# explicitly cached
+CACHE:
+# 2013-08-06 17:55
+index.html
+favicon.png
+css/blockdrop.css
+js/blockdrop.js
+http://fonts.googleapis.com/css?family=Roboto:100,400,900
+
+# must be online
+#NETWORK:
+#login.php
+#/myapi
+#http://api.twitter.com
+
+# static.html will be served if main.php is unavailable
+# offline.jpg will be served in place of all images in images/large
+# offline.html will be server in place of all other .html files
+#FALLBACK
+#/main.php /static.html
+#images/large/ images/offline.jpg
+#*.html /offline.html

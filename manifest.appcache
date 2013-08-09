@@ -5,9 +5,9 @@ CACHE:
 # 2013-08-09 11:15
 index.html
 http://fonts.googleapis.com/css?family=Roboto:400,100,900
-http://themes.googleusercontent.com/static/fonts/roboto/v9/vzIUHo9z-oJ4WgkpPOtg1_esZW2xOQ-xsNqO47m55DA.woff
-http://themes.googleusercontent.com/static/fonts/roboto/v9/2UX7WLTfW3W8TclTUvlFyQ.woff
-http://themes.googleusercontent.com/static/fonts/roboto/v9/mnpfi9pxYH-Go5UiibESIj8E0i7KZn-EPnyo3HZu7kw.woff
+#http://themes.googleusercontent.com/static/fonts/roboto/v9/vzIUHo9z-oJ4WgkpPOtg1_esZW2xOQ-xsNqO47m55DA.woff
+#http://themes.googleusercontent.com/static/fonts/roboto/v9/2UX7WLTfW3W8TclTUvlFyQ.woff
+#http://themes.googleusercontent.com/static/fonts/roboto/v9/mnpfi9pxYH-Go5UiibESIj8E0i7KZn-EPnyo3HZu7kw.woff
 # 2013-08-09 07:29
 css/blockdrop.css
 js/blockdrop.js

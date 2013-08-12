@@ -86,6 +86,12 @@ body {
 	color: white;
 	border-radius: 0.333em;
 	z-index: 99;
+	
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-moz-user-select: moz-none;
+	-ms-user-select: none;
+	user-select: none;
 }
 .button:hover {
 	background: #357ebd;
@@ -109,12 +115,32 @@ body {
 #button-quit { top: 10.25em; }
 
 #button-pause {
-	right: 1em;
+	right: 0.5em;
 	bottom: 1em;
 	
-	width: 4em;
+	width: 4.5em;
 	height: 2em;
 	line-height: 2em;
+}
+
+.button.button-toggle {
+	width: 2em;
+	height: 2em;
+	line-height: 2em;
+}
+.button-toggle[data-on=false] {
+	background: #ca4242;
+}
+.button-toggle[data-on=false]:hover {
+	background: #bd3535;
+}
+#button-music {
+	right: 0.5em;
+	bottom: 3.5em;
+}
+#button-sound {
+	right: 3em;
+	bottom: 3.5em;
 }
 
 .dialog {

@@ -44,6 +44,15 @@ var BlockDropGame = function(targetElement)
 	this.highScoresDialog = null; // HTML element for the "High Scores" dialog
 	this.scoreName = null;		// HTML element for the score name input field
 	
+	// audio variables
+	this.dropSound = new Audio("audio/drop.wav");		// audio element for the drop sound
+	this.rotateSound = new Audio("audio/rotate.wav");	// audio element for the rotate sound
+	this.menuSound = null;								// audio element for the menu blip sound
+	this.gameMusic = new Audio("audio/music.mp3");		// audio element for the backgroud music
+	this.gameMusic.loop = true;
+	this.musicToggleButton = null;						// HTML element for the music toggle button
+	this.soundToggleButton = null;						// HTML element for the sound toggle button
+	
 	// setup localStorage stuff
 	this.numSavedScores = 0;
 	this.highScores = [];
@@ -62,7 +71,7 @@ var BlockDropGame = function(targetElement)
 // First time setup, create all the elements
 BlockDropGame.prototype.initialSetup = function(targetElement)
 {
-	var wrapperElement, scoreWrapper, levelWrapper, linesWrapper, nextWrapper, nextContainer;
+	var wrapperElement, scoreWrapper, levelWrapper, linesWrapper, nextWrapper, initVal;
 	
 	targetElement = targetElement || document.getElementsByTagName("body")[0];
 	
@@ -133,6 +142,23 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	this.linesElement.innerHTML = "0";
 	linesWrapper.appendChild(this.linesElement);
 	this.infoWrapper.appendChild(linesWrapper);
+	
+	// create and append the music and sound toggles
+	this.musicToggleButton = document.createElement("div");
+	this.musicToggleButton.setAttribute("id", "button-music");
+	this.musicToggleButton.setAttribute("class", "button button-toggle");
+	initVal = localStorage.getItem("blockdrop.settings.music") || "true";
+	if (initVal === "true") this.gameMusic.play();
+	this.musicToggleButton.setAttribute("data-on", initVal);
+	this.musicToggleButton.innerHTML = "<i class='icon-music'></i>";
+	this.infoWrapper.appendChild(this.musicToggleButton);
+	this.soundToggleButton = document.createElement("div");
+	this.soundToggleButton.setAttribute("id", "button-sound");
+	this.soundToggleButton.setAttribute("class", "button button-toggle");
+	initVal = localStorage.getItem("blockdrop.settings.sound") || "true";
+	this.soundToggleButton.setAttribute("data-on", initVal);
+	this.soundToggleButton.innerHTML = "<i class='icon-volume-up'></i>";
+	this.infoWrapper.appendChild(this.soundToggleButton);
 };
 
 // Initialise a game, create an initial piece and start the timer
@@ -173,12 +199,17 @@ BlockDropGame.prototype.startGame = function()
 BlockDropGame.prototype.update = function()
 {
 	this._dropWaitId = null;
-	this.hardDropped = false;
 	
 	if (this.canMoveDown()) {
 		this.piece.style.top = (this.piece.offsetTop / this.baseSize) + 1 + "em";
 		this.dropLength = 0;
 	} else {
+		if (this.soundToggleButton.getAttribute("data-on") === "true" && !this.hardDropped) {
+			// play the drop sound after delay on soft drop
+			this.dropSound.play();
+		}
+		this.hardDropped = false;
+		
 		clearInterval(this._intervalId);
 		
 		this.addCurrentPieceToBoard();
@@ -620,10 +651,14 @@ BlockDropGame.prototype.showDialog = function(dialog)
 			tempHTML += "I'm also using it as a testing platform for various JavaScript, HTML5 and CSS3 features. ";
 			tempHTML += "I've tested in Chrome, Firefox, IE 9/10 and Chrome for Android so it should work on most modern platforms.</p>";
 			tempHTML += "<p>Controls:<p>";
-			tempHTML += "<p><span class='key'>&#x25C0;</span> <span class='key'>a</span> <span class='key'>h</span> or swipe &larr;<br />moves the piece left</p>";
-			tempHTML += "<p><span class='key'>&#x25B6;</span> <span class='key'>d</span> <span class='key'>l</span> or swipe &rarr;<br />moves the piece right</p>";
-			tempHTML += "<p><span class='key'>&#x25B2;</span> <span class='key'>w</span> <span class='key'>k</span> swipe &uarr;, or single tap<br />rotates the piece 90&deg; clock-wise</p>";
-			tempHTML += "<p><span class='key'>&#x25BC;</span> <span class='key'>s</span> <span class='key'>j</span> or swipe &darr;<br />soft drops the piece (drop line by line)</p>";
+			tempHTML += "<p><span class='key'><i class='icon-caret-left'></i></span> <span class='key'>a</span> <span class='key'>h</span> or " +
+				"swipe <i class='icon-long-arrow-left'></i><br />moves the piece left</p>";
+			tempHTML += "<p><span class='key'><i class='icon-caret-right'></i></span> <span class='key'>d</span> <span class='key'>l</span> or " +
+				"swipe <i class='icon-long-arrow-right'></i><br />moves the piece right</p>";
+			tempHTML += "<p><span class='key'><i class='icon-caret-down'></i></span> <span class='key'>w</span> <span class='key'>k</span> " +
+				"swipe <i class='icon-long-arrow-up'></i>, or single tap<br />rotates the piece 90&deg; clock-wise</p>";
+			tempHTML += "<p><span class='key'><i class='icon-caret-up'></i></span> <span class='key'>s</span> <span class='key'>j</span> or " +
+				"swipe <i class='icon-long-arrow-down'></i><br />soft drops the piece (drop line by line)</p>";
 			tempHTML += "<p><span class='key key-long'>spacebar</span> or <span class='key key-long'>&crarr; enter</span><br />hard drops the piece (drop all the way to the bottom)</p>";
 			tempHTML += "<p><br />GitHub: view the <a href='https://github.com/bkbooth/BlockDrop' target='_blank'>source code</a> or <a href='https://github.com/bkbooth' target='_blank'>find me</a></p>";
 			tempHTML += "</div>";
@@ -851,7 +886,8 @@ BlockDropGame.prototype.moveDownHandler = function()
 		// if we can't move down, start a timer to trigger a game update
 		if (this._dropWaitId === null) {
 			this._dropWaitId = setTimeout(this.update.bind(this), 500 / this.level);
-		} 
+		}
+		
 		return;
 	}
 	
@@ -864,6 +900,12 @@ BlockDropGame.prototype.hardDropHandler = function()
 	while (this._dropWaitId === null) {
 		this.moveDownHandler();
 	}
+	
+	// play the drop sound immediately on hard drop
+	if (this.soundToggleButton.getAttribute("data-on") === "true") {
+		this.dropSound.play();
+	}
+	
 	// force an update straight away after hard drop
 	this.hardDropped = true;
 }
@@ -876,14 +918,21 @@ BlockDropGame.prototype.rotateHandler = function()
 		if (this.piece.rotate >= 360) {
 			this.piece.rotate = 0;
 		}
-	}
-
-	// Loop through the blocks in the current piece
-	var blocks = this.piece.getElementsByClassName("piece-block");
-	for (var i = 0; i < blocks.length; i++) {
-		// Update their positions to the next rotation step
-		blocks[i].style.left = this.piece.blocksMap["rot"+this.piece.rotate][i].left + "em";
-		blocks[i].style.top = this.piece.blocksMap["rot"+this.piece.rotate][i].top + "em";
+		
+		// pause and reset before playing rotate sound
+		if (this.soundToggleButton.getAttribute("data-on") === "true") {
+			this.rotateSound.pause();
+			this.rotateSound.currentTime = 0;
+			this.rotateSound.play();
+		}
+		
+		// Loop through the blocks in the current piece
+		var blocks = this.piece.getElementsByClassName("piece-block");
+		for (var i = 0; i < blocks.length; i++) {
+			// Update their positions to the next rotation step
+			blocks[i].style.left = this.piece.blocksMap["rot"+this.piece.rotate][i].left + "em";
+			blocks[i].style.top = this.piece.blocksMap["rot"+this.piece.rotate][i].top + "em";
+		}
 	}
 };
 
@@ -902,7 +951,7 @@ BlockDropGame.prototype.scoreCompare = function(a, b)
 // Setup the event listeners
 BlockDropGame.prototype.setupEventListeners = function()
 {
-	var that = this;
+	var that = this, newVal = null;
 	var wrapperElement = this.gameWrapper.parentNode;
 	
 	wrapperElement.addEventListener("click", function(event)
@@ -936,6 +985,29 @@ BlockDropGame.prototype.setupEventListeners = function()
 		} else if (event.target === that.quitButton) {
 			// quit the game
 			that.finishGame(true);
+			event.preventDefault();
+		} else if (event.target === that.soundToggleButton || event.target.parentNode === that.soundToggleButton) {
+			// toggle the sound button
+			if (that.soundToggleButton.getAttribute("data-on") === "false") {
+				newVal = "true";
+			} else {
+				newVal = "false";
+			}
+			that.soundToggleButton.setAttribute("data-on", newVal);
+			localStorage.setItem("blockdrop.settings.sound", newVal);
+			event.preventDefault();
+		} else if (event.target === that.musicToggleButton || event.target.parentNode === that.musicToggleButton) {
+			// toggle the music button
+			if (that.musicToggleButton.getAttribute("data-on") === "false") {
+				newVal = "true";
+				that.gameMusic.play();
+			} else {
+				newVal = "false";
+				that.gameMusic.pause();
+				that.gameMusic.currentTime = 0;
+			}
+			that.musicToggleButton.setAttribute("data-on", newVal);
+			localStorage.setItem("blockdrop.settings.music", newVal);
 			event.preventDefault();
 		} else if (that.infoDialog && event.target === that.infoDialog.getElementsByClassName("close-button")[0]) {
 			// hide the dialog, show the start and about buttons
@@ -984,7 +1056,10 @@ BlockDropGame.prototype.setupEventListeners = function()
 			// alt key pressed, highlight first letter of buttons
 			var buttons = that.gameWrapper.parentNode.getElementsByClassName("button");
 			for (var i = 0; i < buttons.length; i++) {
-				buttons[i].setAttribute("class", "button hl-first");
+				// don't touch the sound or music toggles
+				if (buttons[i] !== that.soundToggleButton && buttons[i] !== that.musicToggleButton) {
+					buttons[i].setAttribute("class", "button hl-first");
+				}
 			}
 			event.preventDefault();
 		}
@@ -1112,7 +1187,9 @@ BlockDropGame.prototype.setupEventListeners = function()
 			// alt key released, undo highlight first letter of buttons
 			var buttons = that.gameWrapper.parentNode.getElementsByClassName("button");
 			for (var i = 0; i < buttons.length; i++) {
-				buttons[i].setAttribute("class", "button");
+				if (buttons[i] !== that.soundToggleButton && buttons[i] !== that.musicToggleButton) {
+					buttons[i].setAttribute("class", "button");
+				}
 			}
 			event.preventDefault();
 		}

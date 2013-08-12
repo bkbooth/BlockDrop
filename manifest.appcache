@@ -1,16 +1,14 @@
 CACHE MANIFEST
 
-# explicitly cached
-CACHE:
+# 2013-08-12 18:20
+index.html
+css/blockdrop.min.css
+js/blockdrop.min.js
 # 2013-08-12 17:15
-css/font-awesome.min.css
 fonts/fontawesome-webfont.woff
 # 2013-08-12 07:03
-js/blockdrop.js
-css/blockdrop.css
 audio/music.mp3
 # 2013-08-09 18:30
-index.html
 audio/drop.wav
 audio/rotate.wav
 # 2013-08-09 11:49

@@ -1218,7 +1218,9 @@ BlockDropGame.prototype.setupEventListeners = function()
 		
 		// event.preventDefault on the "touchmove" handler causes the "touchend" event to still fire
 		// so we need to detect if we've moved the piece during the touch event cycle
-		if (!that.touchMoved && event.target !== that.pauseButton) {
+		if (!that.touchMoved && event.target !== that.pauseButton &&
+				event.target !== that.soundToggleButton && event.target.parentNode !== that.soundToggleButton &&
+				event.target !== that.musicToggleButton && event.target.parentNode !== that.musicToggleButton) {
 			that.rotateHandler();
 			event.preventDefault();
 		}

@@ -7,32 +7,32 @@
 // Define all variables, setup all UI elements
 var BlockDropGame = function(targetElement)
 {
-	// gameplay variables
-	this.lines = 0;				// the number of cleared lines
-	this.score = 0;				// the players score
-	this.level = 1;				// the level, increases every 10 lines, drop speed based on this
-	this.dropLength = 0;		// measure how long the player hard or soft drops the piece continuously
-	this._intervalId = null;	// the main game loop timer
-	this._dropWaitId = null;	// timer triggered when player is holding down until piece hits the bottom
-	this.piece = null;			// the currently moving piece
-	this.nextPiece = null;		// the next piece
-	this.touchStartX = null;	// x coordinate where the touch event started
-	this.touchStartY = null;	// y coordinate where the touch event started
-	this.touchMoved = false;	// records whether the piece has been moved during the touch event
-	this.touchBlocked = false;	// touch temporary blocked to reduce sensitivity / increase control
-	this.hardDropped = false;	// prevent rotating or moving after a hard drop
-	this.isPlaying = false;		// records the state of the game
+	// Gameplay variables
+	this.lines = 0;				// The number of cleared lines
+	this.score = 0;				// The players score
+	this.level = 1;				// The level, increases every 10 lines, drop speed based on this
+	this.dropLength = 0;		// Measure how long the player hard or soft drops the piece continuously
+	this._intervalId = null;	// The main game loop timer
+	this._dropWaitId = null;	// Timer triggered when player is holding down until piece hits the bottom
+	this.piece = null;			// The currently moving piece
+	this.nextPiece = null;		// The next piece
+	this.touchStartX = null;	// X coordinate where the touch event started
+	this.touchStartY = null;	// Y coordinate where the touch event started
+	this.touchMoved = false;	// Records whether the piece has been moved during the touch event
+	this.touchBlocked = false;	// Touch temporary blocked to reduce sensitivity / increase control
+	this.hardDropped = false;	// Prevent rotating or moving after a hard drop
+	this.isPlaying = false;		// Records the state of the game
 	
-	// layout variables
-	this.baseSize = 30;			// the base font size, can resize the whole board with this
-	this.gameWrapper = null;	// the game board
-	this.infoWrapper = null;	// the info sidebar
-	this.scoreElement = null	// the HTML score output element
-	this.levelElement = null;	// the HTML level output element
-	this.linesElement = null;	// the HTML lines output element
-	this.nextElement = null;	// the HTML wrapper that holds the next piece
+	// Layout variables
+	this.baseSize = 30;			// The base font size, can resize the whole board with this
+	this.gameWrapper = null;	// The game board
+	this.infoWrapper = null;	// The info sidebar
+	this.scoreElement = null	// The HTML score output element
+	this.levelElement = null;	// The HTML level output element
+	this.linesElement = null;	// The HTML lines output element
+	this.nextElement = null;	// The HTML wrapper that holds the next piece
 	
-	// dialogs
+	// Dialogs
 	this.startButton = null;	// HTML element for the "Start" button
 	this.aboutButton = null;	// HTML element for the "About" button
 	this.scoresButton = null;	// HTML element for the "High Scores" button
@@ -44,31 +44,30 @@ var BlockDropGame = function(targetElement)
 	this.highScoresDialog = null; // HTML element for the "High Scores" dialog
 	this.scoreName = null;		// HTML element for the score name input field
 	
-	// audio variables
-	this.dropSound = new Audio("audio/drop.wav");		// audio element for the drop sound
-	this.rotateSound = new Audio("audio/rotate.wav");	// audio element for the rotate sound
-	this.menuSound = null;								// audio element for the menu blip sound
-	this.gameMusic = new Audio("audio/Havok.ogg");		// audio element for the backgroud music
+	// Audio variables
+	this.dropSound = new Audio("audio/drop.wav");		// Audio element for the drop sound
+	this.rotateSound = new Audio("audio/rotate.wav");	// Audio element for the rotate sound
+	this.gameMusic = new Audio("audio/Havok.ogg");		// Audio element for the backgroud music
 	this.gameMusic.loop = true;
 	this.musicToggleButton = null;						// HTML element for the music toggle button
 	this.soundToggleButton = null;						// HTML element for the sound toggle button
 	
-	// setup localStorage stuff
-	this.numSavedScores = 0;
-	this.highScores = [];
+	// Setup localStorage stuff
+	this.numSavedScores = 0;	// Number of saved high scores
+	this.highScores = [];		// Array of the high scores and names
 	this.loadScores();
 	
-	// load the UI and listeners
+	// Load the UI and listeners
 	this.initialSetup(targetElement);
 	this.setupEventListeners();
 	
-	// show the start game and about buttons
+	// Show the start game, about and high scores buttons
 	this.showDialog("start");
 	this.showDialog("about");
 	this.showDialog("scores");
 };
 
-// First time setup, create all the elements
+// First time setup, create all the DOM elements
 BlockDropGame.prototype.initialSetup = function(targetElement)
 {
 	var wrapperElement, scoreWrapper, levelWrapper, linesWrapper, nextWrapper, initVal;
@@ -80,31 +79,31 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	var gameHeight = 21.0;
 	var gameRatio = gameWidth / gameHeight;
 	if (window.innerWidth / window.innerHeight > gameRatio) {
-		// extra horizontal space
+		// Extra horizontal space
 		this.baseSize = Math.floor(window.innerHeight / gameHeight);
 	} else {
-		// extra vertical space
+		// Extra vertical space
 		this.baseSize = Math.floor(window.innerWidth / gameWidth);
 	}
 	document.getElementsByTagName("body")[0].style.fontSize = this.baseSize + "px";
 	
-	// create and append the game wrapper
+	// Create and append the game wrapper
 	wrapperElement = document.createElement("div");
 	wrapperElement.setAttribute("id", "game-wrapper");
 	wrapperElement.style.marginTop = Math.floor((window.innerHeight - (this.baseSize * gameHeight)) / 2) + "px";
 	targetElement.appendChild(wrapperElement);
 	
-	// create and append the game board
+	// Create and append the game board
 	this.gameWrapper = document.createElement("div");
 	this.gameWrapper.setAttribute("id", "game-board");
 	wrapperElement.appendChild(this.gameWrapper);
 	
-	// create and append the info bar
+	// Create and append the info bar
 	this.infoWrapper = document.createElement("div");
 	this.infoWrapper.setAttribute("id", "game-info");
 	wrapperElement.appendChild(this.infoWrapper);
 	
-	// create and append the next block display
+	// Create and append the next block display
 	nextWrapper = document.createElement("div");
 	nextWrapper.setAttribute("id", "game-next");
 	nextWrapper.innerHTML = "<span class='title'>Next:</span>"
@@ -113,7 +112,7 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	nextWrapper.appendChild(this.nextElement);
 	this.infoWrapper.appendChild(nextWrapper);
 	
-	// create and append the score display to the info bar
+	// Create and append the score display to the info bar
 	scoreWrapper = document.createElement("div");
 	scoreWrapper.setAttribute("id", "game-score");
 	scoreWrapper.innerHTML = "<span class='title'>Score:</span> ";
@@ -123,7 +122,7 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	scoreWrapper.appendChild(this.scoreElement);
 	this.infoWrapper.appendChild(scoreWrapper);
 	
-	// create and append the level display to the info bar
+	// Create and append the level display to the info bar
 	levelWrapper = document.createElement("div");
 	levelWrapper.setAttribute("id", "game-level");
 	levelWrapper.innerHTML = "<span class='title'>Level:</span> ";
@@ -133,7 +132,7 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	levelWrapper.appendChild(this.levelElement);
 	this.infoWrapper.appendChild(levelWrapper);
 	
-	// create and append the lines display to the info bar
+	// Create and append the lines display to the info bar
 	linesWrapper = document.createElement("div");
 	linesWrapper.setAttribute("id", "game-lines");
 	linesWrapper.innerHTML = "<span class='title'>Lines:</span> ";
@@ -143,7 +142,7 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	linesWrapper.appendChild(this.linesElement);
 	this.infoWrapper.appendChild(linesWrapper);
 	
-	// create and append the music and sound toggles
+	// Create and append the music toggle button, load initial value from localStorage
 	this.musicToggleButton = document.createElement("div");
 	this.musicToggleButton.setAttribute("id", "button-music");
 	this.musicToggleButton.setAttribute("class", "button button-toggle");
@@ -152,6 +151,8 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	this.musicToggleButton.setAttribute("data-on", initVal);
 	this.musicToggleButton.innerHTML = "<i class='icon-music'></i>";
 	this.infoWrapper.appendChild(this.musicToggleButton);
+	
+	// Create and append the sound toggle button, load initial value from localStorage
 	this.soundToggleButton = document.createElement("div");
 	this.soundToggleButton.setAttribute("id", "button-sound");
 	this.soundToggleButton.setAttribute("class", "button button-toggle");
@@ -161,15 +162,63 @@ BlockDropGame.prototype.initialSetup = function(targetElement)
 	this.infoWrapper.appendChild(this.soundToggleButton);
 };
 
-// Initialise a game, create an initial piece and start the timer
+// Load the saved scores from localStorage
+BlockDropGame.prototype.loadScores = function() {
+	// Get the number of saved scores
+	this.numSavedScores = parseInt( localStorage.getItem("blockdrop.numscores"), 10 ) || 0;
+	
+	// loop through loading scores from localStorage
+	for (var i = 0; i < this.numSavedScores; i++) {
+		this.highScores[i] = {};
+		this.highScores[i].name = localStorage.getItem("blockdrop.scores." + i + ".name");
+		this.highScores[i].score = parseInt( localStorage.getItem("blockdrop.scores." + i + ".score"), 10 );
+	}
+}
+
+// Save the users input name with their score
+BlockDropGame.prototype.saveScore = function() {
+	// Update and sort the saved scores object array
+	this.highScores[this.numSavedScores] = {};
+	this.highScores[this.numSavedScores].name = this.scoreName.value;
+	this.highScores[this.numSavedScores].score = this.score;
+	this.highScores.sort(this.scoreCompare);
+	
+	// Increment the number of saved scores (max 20)
+	this.numSavedScores++;
+	if (this.numSavedScores > 20) {
+		this.numSavedScores = 20;
+	}
+	
+	// loop through and save all of the scores back to localStorage
+	for (var i = 0; i < this.numSavedScores; i++) {
+		localStorage.setItem("blockdrop.scores." + i + ".name", this.highScores[i].name);
+		localStorage.setItem("blockdrop.scores." + i + ".score", this.highScores[i].score);
+	}
+	localStorage.setItem("blockdrop.numscores", this.numSavedScores);
+}
+
+// Compare two score objects
+BlockDropGame.prototype.scoreCompare = function(a, b)
+{
+	if (a.score < b.score) {
+		return 1;
+	} else if (a.score > b.score) {
+		return -1;
+	} else {
+		return 0;
+	}
+}
+
+// Initialise the game, create an initial piece and start the timer
 BlockDropGame.prototype.startGame = function()
 {
 	// Create the initial piece
-	this.piece = this.gameWrapper.appendChild(PieceFactory.create());
+	this.piece = this.gameWrapper.appendChild( PieceFactory.create() );
 	this.piece.style.top = -1 + "em";
 	this.piece.style.left = (5 - (Math.round(this.piece.size / 2))) + "em"; 
 	
-	this.nextPiece = this.nextElement.appendChild(PieceFactory.create());
+	// Create the first next piece
+	this.nextPiece = this.nextElement.appendChild( PieceFactory.create() );
 	this.nextPiece.style.left = ((4 - this.nextPiece.size) / 2) + "em";
 	this.nextPiece.style.top = ((4 - this.nextPiece.size) / 2) + "em";
 	
@@ -184,14 +233,14 @@ BlockDropGame.prototype.startGame = function()
 	this.touchBlocked = false;
 	this.isPlaying = true;
 	
-	// show/hide the relevant dialogs
+	// Show/hide the relevant dialogs
 	this.hideDialog("start");
 	this.hideDialog("about");
 	this.hideDialog("scores");
 	this.showDialog("pause");
 	
 	// Start the timer
-	this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
+	this._intervalId = setInterval( this.update.bind(this), 1000 / this.level );
 };
 
 // Automatically drop the current piece if possible
@@ -204,8 +253,8 @@ BlockDropGame.prototype.update = function()
 		this.piece.style.top = (this.piece.offsetTop / this.baseSize) + 1 + "em";
 		this.dropLength = 0;
 	} else {
+		// Play the drop sound after delay on soft drop
 		if (this.soundToggleButton.getAttribute("data-on") === "true" && !this.hardDropped) {
-			// play the drop sound after delay on soft drop
 			this.dropSound.play();
 		}
 		this.hardDropped = false;
@@ -227,17 +276,17 @@ BlockDropGame.prototype.update = function()
 			
 			// Increase the level if we just hit a multiple of 10 lines 
 			if (this.lines % 10 === 0) {
-				//console.log("speeding up!");
 				this.level++;
 			}
 		}
 
-		// Create a new piece and restart the timer
+		// Copy the next piece to the current piece and set it up
 		this.piece = this.nextPiece.parentNode.removeChild(this.nextPiece);
 		this.gameWrapper.appendChild(this.piece);
 		this.piece.style.top = -1 + "em";
 		this.piece.style.left = (5 - (Math.round(this.piece.size / 2))) + "em"; 
 		
+		// Create a new next piece
 		this.nextPiece = this.nextElement.appendChild(PieceFactory.create());
 		this.nextPiece.style.left = ((4 - this.nextPiece.size) / 2) + "em";
 		this.nextPiece.style.top = ((4 - this.nextPiece.size) / 2) + "em";
@@ -245,22 +294,14 @@ BlockDropGame.prototype.update = function()
 		if (this.isGameOver()) {
 			this.finishGame(false);
 		} else {
-			this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
+			this._intervalId = setInterval( this.update.bind(this), 1000 / this.level );
 		}
 		
 		this.drawElements();
 	}
 };
 
-// The loop function, update the board, draw any changes
-/* BlockDropGame.prototype.run = function()
-{
-	//console.log("running!");
-	BlockDropGame.update();
-	//BlockDropGame.draw();
-} */
-
-// Ideally all output to the HTML should happen here
+// Update the info DOM elements
 BlockDropGame.prototype.drawElements = function()
 {
 	this.scoreElement.innerHTML = this.score;
@@ -278,9 +319,11 @@ BlockDropGame.prototype.canMoveDown = function(piece)
 		top: this.baseSize,
 		left: 0
 	};
+	
 	if (this.isIntersecting(piece, 'bottomWall', offsets)) {
 		return false;
 	}
+	
 	return true;
 };
 
@@ -294,9 +337,11 @@ BlockDropGame.prototype.canMoveLeft = function(piece)
 		top: 0,
 		left: -this.baseSize
 	};
+	
 	if (this.isIntersecting(piece, 'leftWall', offsets)) {
 		return false;
 	}
+	
 	return true;
 };
 
@@ -310,25 +355,29 @@ BlockDropGame.prototype.canMoveRight = function(piece)
 		top: 0,
 		left: this.baseSize
 	};
+	
 	if (this.isIntersecting(piece, 'rightWall', offsets)) {
 		return false;
 	}
+	
 	return true;
 };
 
 // Check if rotating will cause a collision with other pieces
-// Always want to allow rotation against a wall, will simply adjust position after rotate
+// Always want to allow rotation against a wall, adjust position after rotate
 BlockDropGame.prototype.canRotate = function()
 {	
-	// Set the next rotation step
-	var tempPiece = null, tempRotate = this.piece.rotate + 90, testFail = null;
+	var tempPiece, testFail;
+	
+	// Get the next rotation step	
+	var tempRotate = this.piece.rotate + 90;
 	if (tempRotate >= 360) {
 		tempRotate = 0;
 	}
 	
 	// Create a temporary piece with the next rotation step
-	tempPiece = this.gameWrapper.appendChild(PieceFactory.create(this.piece.pieceIndex, tempRotate));
-	tempPiece.style.zIndex = "-1";
+	tempPiece = this.gameWrapper.appendChild( PieceFactory.create(this.piece.pieceIndex, tempRotate) );
+	tempPiece.style.zIndex = "-1"; // Shouldn't be needed, just in case though
 	tempPiece.style.left = (this.piece.offsetLeft / this.baseSize) + "em";
 	tempPiece.style.top = (this.piece.offsetTop / this.baseSize) + "em";
 	
@@ -345,11 +394,11 @@ BlockDropGame.prototype.canRotate = function()
 			offset = 2;
 		}
 		
-		if (testFail === 'leftWall' && this.canMoveRight(tempPiece, offset)) {
+		if (testFail === 'leftWall' && this.canMoveRight(tempPiece)) {
 			this.piece.style.left = (this.piece.offsetLeft / this.baseSize) + offset + "em";
 			this.gameWrapper.removeChild(tempPiece);
 			return true;
-		} else if (testFail === 'rightWall' && this.canMoveLeft(tempPiece, offset)) {
+		} else if (testFail === 'rightWall' && this.canMoveLeft(tempPiece)) {
 			this.piece.style.left = (this.piece.offsetLeft / this.baseSize) - offset + "em";
 			this.gameWrapper.removeChild(tempPiece);
 			return true;
@@ -363,8 +412,8 @@ BlockDropGame.prototype.canRotate = function()
 	return true;
 };
 
-// Is the current piece intersecting with any walls or other pieces?
-BlockDropGame.prototype.isIntersecting = function(object, target, offsets)
+// Check if the piece is intersecting with any walls or other pieces
+BlockDropGame.prototype.isIntersecting = function(object, target, offset)
 {
 	// Get the blocks of the current piece
 	var objectBlocks = object.getElementsByClassName("piece-block");
@@ -372,7 +421,7 @@ BlockDropGame.prototype.isIntersecting = function(object, target, offsets)
 	// Check if any of the piece blocks will be outside the left wall
 	if (target === 'leftWall' || target === 'all') {
 		for (var i = 0; i < objectBlocks.length; i++) {
-			if (object.offsetLeft + objectBlocks[i].offsetLeft + offsets.left < 0) {
+			if (object.offsetLeft + objectBlocks[i].offsetLeft + offset.left < 0) {
 				return 'leftWall';
 			}
 		}
@@ -381,7 +430,7 @@ BlockDropGame.prototype.isIntersecting = function(object, target, offsets)
 	// Check if any of the piece blocks will be outside the right wall
 	if (target === 'rightWall' || target === 'all') {
 		for (var i = 0; i < objectBlocks.length; i++) {
-			if (object.offsetLeft + objectBlocks[i].offsetLeft + objectBlocks[i].offsetWidth + offsets.left > this.baseSize * 10) {
+			if (object.offsetLeft + objectBlocks[i].offsetLeft + objectBlocks[i].offsetWidth + offset.left > this.baseSize * 10) {
 				return 'rightWall';
 			}
 		}
@@ -390,22 +439,22 @@ BlockDropGame.prototype.isIntersecting = function(object, target, offsets)
 	// Check if any of the piece blocks will be outside the bottom wall
 	if (target === 'bottomWall' || target === 'all') {
 		for (var i = 0; i < objectBlocks.length; i++) {
-			if (object.offsetTop + objectBlocks[i].offsetTop + objectBlocks[i].offsetHeight + offsets.top > this.baseSize * 20) {
+			if (object.offsetTop + objectBlocks[i].offsetTop + objectBlocks[i].offsetHeight + offset.top > this.baseSize * 20) {
 				return 'bottomWall';
 			}
 		}
 	}
 	
 	// Always compare against all other blocks
-	if (this.checkAllBlocks(object, offsets)) {
+	if (this.checkAllBlocks(object, offset)) {
 		return 'otherBlocks';
 	}
 	
 	return false;
 };
 
-// Compare the blocks of the current piece to all other blocks on the game board
-BlockDropGame.prototype.checkAllBlocks = function(object, offsets)
+// Compare the blocks of the piece with all other blocks on the game board
+BlockDropGame.prototype.checkAllBlocks = function(object, offset)
 {
 	// Initialise some variables
 	var i, j, allBlocks = this.gameWrapper.getElementsByClassName("piece-block"),
@@ -419,13 +468,12 @@ BlockDropGame.prototype.checkAllBlocks = function(object, offsets)
 			for (j = 0; j < objectBlocks.length; j++) {
 				// Do a simple box collision check
 				if (this.isBoxIntersecting({
-					// need to create a new source object accounting for parent offsets
-					// maybe there's a better way?
+					// Need to create a new source object accounting for parent offsets
 					offsetLeft: object.offsetLeft + objectBlocks[j].offsetLeft,
 					offsetTop: object.offsetTop + objectBlocks[j].offsetTop,
 					offsetWidth: objectBlocks[j].offsetWidth,
 					offsetHeight: objectBlocks[j].offsetHeight
-				}, allBlocks[i], offsets)) {
+				}, allBlocks[i], offset)) {
 					return true;
 				}
 			}
@@ -435,17 +483,17 @@ BlockDropGame.prototype.checkAllBlocks = function(object, offsets)
 	return false;
 };
 
-// Simple bounding box check, used for both crude and precision checks
-BlockDropGame.prototype.isBoxIntersecting = function(sourceObject, targetObject, sourceOffsets)
+// Simple box collision detection
+BlockDropGame.prototype.isBoxIntersecting = function(sourceObject, targetObject, sourceOffset)
 {
-	if (sourceObject.offsetTop + sourceObject.offsetHeight + sourceOffsets.top > targetObject.offsetTop &&		// source.bottom >= target.top
-		sourceObject.offsetTop + sourceOffsets.top < targetObject.offsetTop + targetObject.offsetHeight &&		// source.top <= target.bottom
-		sourceObject.offsetLeft + sourceObject.offsetWidth + sourceOffsets.left > targetObject.offsetLeft &&	// source.right >= target.left
-		sourceObject.offsetLeft + sourceOffsets.left < targetObject.offsetLeft + targetObject.offsetWidth) {	// source.left <= target.right
+	if (sourceObject.offsetTop + sourceObject.offsetHeight + sourceOffset.top > targetObject.offsetTop &&		// source.bottom >= target.top
+		sourceObject.offsetTop + sourceOffset.top < targetObject.offsetTop + targetObject.offsetHeight &&		// source.top <= target.bottom
+		sourceObject.offsetLeft + sourceObject.offsetWidth + sourceOffset.left > targetObject.offsetLeft &&		// source.right >= target.left
+		sourceObject.offsetLeft + sourceOffset.left < targetObject.offsetLeft + targetObject.offsetWidth) {		// source.left <= target.right
 		return true;
-	} else {
-		return false;
 	}
+	
+	return false;
 };
 
 // Create and return a list of rows which are full of blocks
@@ -507,40 +555,43 @@ BlockDropGame.prototype.clearCompleteRow = function(completeRow)
 	}
 };
 
-// Is the newly created piece already overlapping an existing piece?
-// Only called when new pieces are created
+// Check if the newly created piece is already unable to move
 BlockDropGame.prototype.isGameOver = function()
 {
-	// No offset, we only care about where the piece is currently
+	// No offset, we only care about where the piece is now
 	var offsets = {
 		top: 0,
 		left: 0
 	};
+	
 	if (this.isIntersecting(this.piece, 'bottomWall', offsets)) {
 		return true;
 	}
+	
 	return false;
 };
 
-// Before starting a new game, clear the current game board
+// Clear the current game board before starting a new game
 BlockDropGame.prototype.clearGameBoard = function()
 {
+	// Get all blocks from the game board
 	var allBlocks = this.gameWrapper.getElementsByClassName("piece-block");
-	var allBlocksLength = allBlocks.length;// the length changes as we remove blocks
+	var allBlocksLength = allBlocks.length; // the length changes as we remove blocks
 	
 	for (var i = 0; i < allBlocksLength; i++) {
-		// Always remove the first one
+		// Always remove the first block from the array
 		if (allBlocks[0].parentNode !== this.piece) {
 			this.gameWrapper.removeChild(allBlocks[0]);
 		}
 	}
 	
+	// Remove the current and next pieces
 	this.gameWrapper.removeChild(this.piece);
 	this.nextElement.removeChild(this.nextPiece);
 };
 
-// Remove the piece wrapper and leave just the blocks behind
-// This makes it much easier to detect and remove completed rows
+// Remove the piece wrapper and place the blocks on the game board
+// This is needed to detect and remove completed rows
 BlockDropGame.prototype.addCurrentPieceToBoard = function()
 {	
 	// Initialise some variables
@@ -567,10 +618,10 @@ BlockDropGame.prototype.addCurrentPieceToBoard = function()
 	this.gameWrapper.removeChild(this.piece);
 };
 
-// increment the score based on the number of rows completed
+// Increment the score based on the number of rows completed
+// small score increases for hard and soft drops
 BlockDropGame.prototype.incrementScore = function(numRows)
 {
-	//console.log(numRows);
 	switch (numRows) {
 		case 4:
 			this.score += (1200 * this.level);
@@ -587,14 +638,15 @@ BlockDropGame.prototype.incrementScore = function(numRows)
 		default:
 			break;
 	}
+	
 	this.score += this.dropLength;
 	this.dropLength = 0;
 };
 
-// show the requested button
+// Show the requested button
 BlockDropGame.prototype.showDialog = function(dialog)
 {
-	var tempHTML; // need to build up HTML before applying it to innerHTML
+	var tempHTML; // Need to build up HTML before applying it to innerHTML
 	
 	switch (dialog) {
 		case "start":
@@ -705,7 +757,8 @@ BlockDropGame.prototype.showDialog = function(dialog)
 	}
 };
 
-// hide the requested button or dialog, accepts a string or an object
+// Hide the requested button or dialog, accepts a string or an object
+// Doesn't work properly when passing the actual object in
 BlockDropGame.prototype.hideDialog = function(dialog)
 {
 	if (typeof dialog === "object" && (
@@ -765,47 +818,48 @@ BlockDropGame.prototype.hideDialog = function(dialog)
 	}
 };
 
-// clear the timer, hide the game board
+// Clear the timer and hide the game board
 BlockDropGame.prototype.pauseGame = function()
 {
-	// clear the game timer and set the game state
+	// Clear the game timer and set the game state
 	clearTimeout(this._intervalId);
 	this.isPlaying = false;
 	
-	// hide all blocks
+	// Hide all blocks on the game board
 	var allBlocks = this.gameWrapper.getElementsByClassName("piece-block");
 	for (var i = 0; i < allBlocks.length; i++) {
 		allBlocks[i].style.display = "none";
 	}
 	this.nextPiece.style.display = "none";
 	
-	// show/hide the relevant dialogs
+	// Show/hide the relevant dialogs
 	this.hideDialog("pause");
 	this.showDialog("resume");
 	this.showDialog("quit");
 };
 
-// clear the timer, show the game board
+// Restart the timer and show the game board
 BlockDropGame.prototype.resumeGame = function()
 {
-	// show all blocks 
+	// Show all blocks on the game board 
 	var allBlocks = this.gameWrapper.getElementsByClassName("piece-block");
 	for (var i = 0; i < allBlocks.length; i++) {
 		allBlocks[i].style.display = "block";
 	}
 	this.nextPiece.style.display = "block";
 	
-	// set the game state and restart the timer
+	// Set the game state and restart the timer
 	this.isPlaying = true;
-	this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
+	this._intervalId = setInterval( this.update.bind(this), 1000 / this.level );
 	
-	// show/hide the relevant dialogs
+	// Show/hide the relevant dialogs
 	this.hideDialog("resume");
 	this.hideDialog("quit");
 	this.showDialog("pause");
 };
 
-// set the game state, clear the board and hide/show relevant dialogs
+// Set the game state, clear the board and hide/show relevant dialogs
+// quit variable indicates whether the game was quit or finished properly
 BlockDropGame.prototype.finishGame = function(quit)
 {
 	this.isPlaying = false;
@@ -823,42 +877,7 @@ BlockDropGame.prototype.finishGame = function(quit)
 	}
 }
 
-// load the saved scores from localStorage
-BlockDropGame.prototype.loadScores = function() {
-	// get the number of saved scores
-	this.numSavedScores = parseInt(localStorage.getItem("blockdrop.numscores"), 10) || 0;
-	
-	// loop through loading scores from localStorage
-	for (var i = 0; i < this.numSavedScores; i++) {
-		this.highScores[i] = {};
-		this.highScores[i].name = localStorage.getItem("blockdrop.scores." + i + ".name");
-		this.highScores[i].score = parseInt(localStorage.getItem("blockdrop.scores." + i + ".score"), 10);
-	}
-}
-
-// save the users input name with their score
-BlockDropGame.prototype.saveScore = function() {
-	// update and sort the saved scores object array
-	this.highScores[this.numSavedScores] = {};
-	this.highScores[this.numSavedScores].name = this.scoreName.value;
-	this.highScores[this.numSavedScores].score = this.score;
-	this.highScores.sort(this.scoreCompare);
-	
-	// increment the number of saved scores (max 20)
-	this.numSavedScores++;
-	if (this.numSavedScores > 20) {
-		this.numSavedScores = 20;
-	}
-	
-	// loop through and save all of the scores back to localStorage
-	for (var i = 0; i < this.numSavedScores; i++) {
-		localStorage.setItem("blockdrop.scores." + i + ".name", this.highScores[i].name);
-		localStorage.setItem("blockdrop.scores." + i + ".score", this.highScores[i].score);
-	}
-	localStorage.setItem("blockdrop.numscores", this.numSavedScores);
-}
-
-// left key or left swipe handler
+// Left key and left swipe handler
 BlockDropGame.prototype.moveLeftHandler = function()
 {
 	if (this.canMoveLeft()) {
@@ -866,7 +885,7 @@ BlockDropGame.prototype.moveLeftHandler = function()
 	}
 };
 
-// right key or right swipe handler
+// Right key and right swipe handler
 BlockDropGame.prototype.moveRightHandler = function()
 {
 	if (this.canMoveRight()) {
@@ -874,7 +893,7 @@ BlockDropGame.prototype.moveRightHandler = function()
 	}
 };
 
-// down key or swipe down handler
+// Down key and swipe down handler
 BlockDropGame.prototype.moveDownHandler = function()
 {
 	clearInterval(this._intervalId);
@@ -883,34 +902,35 @@ BlockDropGame.prototype.moveDownHandler = function()
 		this.piece.style.top = (this.piece.offsetTop / this.baseSize) + 1 + "em";
 		this.dropLength++;
 	} else {
-		// if we can't move down, start a timer to trigger a game update
+		// If we can't move down, start a timer to trigger a game update
 		if (this._dropWaitId === null) {
-			this._dropWaitId = setTimeout(this.update.bind(this), 500 / this.level);
+			this._dropWaitId = setTimeout( this.update.bind(this), 500 / this.level );
 		}
 		
 		return;
 	}
 	
-	this._intervalId = setInterval(this.update.bind(this), 1000 / this.level);
+	this._intervalId = setInterval( this.update.bind(this), 1000 / this.level );
 };
 
-// hard drop drops the piece all the way to the bottom
+// Hard drop drops the piece all the way to the bottom
 BlockDropGame.prototype.hardDropHandler = function()
 {
+	// Keep moving down while we can
 	while (this._dropWaitId === null) {
 		this.moveDownHandler();
 	}
 	
-	// play the drop sound immediately on hard drop
+	// Play the drop sound immediately on hard drop
 	if (this.soundToggleButton.getAttribute("data-on") === "true") {
 		this.dropSound.play();
 	}
 	
-	// force an update straight away after hard drop
+	// Force an update straight away after hard drop
 	this.hardDropped = true;
 }
 
-// up key or swipe up handler
+// Up key, swipe up handler and single tap handler
 BlockDropGame.prototype.rotateHandler = function()
 {
 	if (this.canRotate()) {
@@ -919,7 +939,7 @@ BlockDropGame.prototype.rotateHandler = function()
 			this.piece.rotate = 0;
 		}
 		
-		// pause and reset before playing rotate sound
+		// Pause and reset before playing rotate sound
 		if (this.soundToggleButton.getAttribute("data-on") === "true") {
 			this.rotateSound.pause();
 			this.rotateSound.currentTime = 0;
@@ -936,68 +956,57 @@ BlockDropGame.prototype.rotateHandler = function()
 	}
 };
 
-// compare two score objects
-BlockDropGame.prototype.scoreCompare = function(a, b)
-{
-	if (a.score < b.score) {
-		return 1;
-	} else if (a.score > b.score) {
-		return -1;
-	} else {
-		return 0;
-	}
-}
-
 // Setup the event listeners
 BlockDropGame.prototype.setupEventListeners = function()
 {
-	var that = this, newVal = null;
-	var wrapperElement = this.gameWrapper.parentNode;
+	// Initialise variables
+	var newVal, that = this, wrapperElement = this.gameWrapper.parentNode;
 	
 	wrapperElement.addEventListener("click", function(event)
 	{
 		if (event.target === that.startButton) {
-			// start the game
+			// Start the game
 			that.startGame();
 			event.preventDefault();
 		} else if (event.target === that.aboutButton) {
-			// hide the start and about buttons, show the info dialog
+			// Hide the start, about and scores buttons, show the info dialog
 			that.hideDialog("start");
 			that.hideDialog("about");
 			that.hideDialog("scores");
 			that.showDialog("info");
 			event.preventDefault();
 		} else if (event.target === that.scoresButton) {
-			// hide the start and about buttons, show the high scores dialog
+			// Hide the start, about and scores buttons, show the high scores dialog
 			that.hideDialog("start");
 			that.hideDialog("about");
 			that.hideDialog("scores");
 			that.showDialog("scores-dialog");
 			event.preventDefault();
 		} else if (event.target === that.pauseButton) {
-			// pause the game
+			// Pause the game
 			that.pauseGame();
 			event.preventDefault();
 		} else if (event.target === that.resumeButton) {
-			// resume the game
+			// Resume the game
 			that.resumeGame();
 			event.preventDefault();
 		} else if (event.target === that.quitButton) {
-			// quit the game
+			// Quit the game
 			that.finishGame(true);
 			event.preventDefault();
 		} else if (event.target === that.soundToggleButton || event.target.parentNode === that.soundToggleButton) {
-			// toggle the sound button
+			// Toggle the sound button
 			if (that.soundToggleButton.getAttribute("data-on") === "false") {
 				newVal = "true";
 			} else {
 				newVal = "false";
 			}
+			// Store the new value back to local storage
 			that.soundToggleButton.setAttribute("data-on", newVal);
 			localStorage.setItem("blockdrop.settings.sound", newVal);
 			event.preventDefault();
 		} else if (event.target === that.musicToggleButton || event.target.parentNode === that.musicToggleButton) {
-			// toggle the music button
+			// Toggle the music button, start/stop the music
 			if (that.musicToggleButton.getAttribute("data-on") === "false") {
 				newVal = "true";
 				that.gameMusic.play();
@@ -1006,25 +1015,26 @@ BlockDropGame.prototype.setupEventListeners = function()
 				that.gameMusic.pause();
 				that.gameMusic.currentTime = 0;
 			}
+			// Store the new value back to local storage
 			that.musicToggleButton.setAttribute("data-on", newVal);
 			localStorage.setItem("blockdrop.settings.music", newVal);
 			event.preventDefault();
 		} else if (that.infoDialog && event.target === that.infoDialog.getElementsByClassName("close-button")[0]) {
-			// hide the dialog, show the start and about buttons
+			// Hide the info dialog, show the start, about and scores buttons
 			that.hideDialog("info");
 			that.showDialog("start");
 			that.showDialog("about");
 			that.showDialog("scores");
 			event.preventDefault();
 		} else if (that.finishDialog && event.target === that.finishDialog.getElementsByClassName("close-button")[0]) {
-			// hide the dialog, show the start and about buttons
+			// Hide the finish dialog, show the start, about and scores buttons
 			that.hideDialog("finish");
 			that.showDialog("start");
 			that.showDialog("about");
 			that.showDialog("scores");
 			event.preventDefault();
 		} else if (that.highScoresDialog && event.target === that.highScoresDialog.getElementsByClassName("close-button")[0]) {
-			// hide the dialog, show the start and about buttons
+			// Hide the high scores dialog, show the start, about and scores buttons
 			that.hideDialog("scores-dialog");
 			that.showDialog("start");
 			that.showDialog("about");
@@ -1033,18 +1043,16 @@ BlockDropGame.prototype.setupEventListeners = function()
 		}
 	});
 	
-	// still needs to be window?
+	// Need to setup the keyboard listeners on the window rather than the game wrapper
 	window.addEventListener("keydown", function(event)
 	{
 		var keyPressed = event.KeyCode || event.which;
-		//console.log(keyPressed);
-		//console.log(event);
 		
 		if (that.scoreName && event.target === that.scoreName && event.keyCode !== 27) {
-			// when the user is inputting their name, only allow escape to flow
-			// through to the rest of the event handler
+			// When the user is inputting their name, only allow escape key to
+			// flow through to the rest of the event handler
 			if (event.keyCode === 13) {
-				// enter key pressed
+				// Enter key pressed, save the score and show/hide the dialogs
 				that.saveScore();
 				that.hideDialog("finish");
 				that.showDialog("scores-dialog");
@@ -1053,10 +1061,10 @@ BlockDropGame.prototype.setupEventListeners = function()
 		}
 		
 		if (keyPressed === 18) {
-			// alt key pressed, highlight first letter of buttons
+			// Alt key pressed, highlight first letter of buttons
 			var buttons = that.gameWrapper.parentNode.getElementsByClassName("button");
 			for (var i = 0; i < buttons.length; i++) {
-				// don't touch the sound or music toggles
+				// Don't touch the sound or music toggles
 				if (buttons[i] !== that.soundToggleButton && buttons[i] !== that.musicToggleButton) {
 					buttons[i].setAttribute("class", "button hl-first");
 				}
@@ -1064,50 +1072,50 @@ BlockDropGame.prototype.setupEventListeners = function()
 			event.preventDefault();
 		}
 		
-		// split the touch controls into game and menu controls
+		// Split the keyboard controls into game and menu controls
 		if (that.isPlaying && !that.hardDropped) {
-			// game is playing
+			// Game is playing
 			switch (keyPressed) {
-				case 37:	// left key
+				case 37:	// Left key
 				case 72:	// 'h' key
 				case 65:	// 'a' key
 					that.moveLeftHandler();
 					event.preventDefault();
 					break;
-				case 39:	// right key
+				case 39:	// Right key
 				case 76:	// 'l' key
 				case 68:	// 'd' key
 					that.moveRightHandler();
 					event.preventDefault();
 					break;
-				case 38:	// up key
+				case 38:	// Up key
 				case 75:	// 'k' key
 				case 87:	// 'w' key
 					that.rotateHandler();
 					event.preventDefault();
 					break;
-				case 40:	// down key
+				case 40:	// Down key
 				case 74:	// 'j' key
 				case 83:	// 's' key
 					that.moveDownHandler();
 					event.preventDefault();
 					break;
-				case 13:	// enter key
-				case 32:	// space key
+				case 13:	// Enter key
+				case 32:	// Space key
 					that.hardDropHandler();
 					event.preventDefault();
 					break;
-				case 27:	// esc key
+				case 27:	// Esc key
 				case 80:	// 'p' key
 					that.pauseGame();
 					event.preventDefault();
 					break;
 			}
 		} else if (!that.isPlaying) {
-			// game not playing
+			// Game is not playing
 			switch (keyPressed) {
-				case 13:	// enter key
-				case 32:	// space key
+				case 13:	// Enter key
+				case 32:	// Space key
 					if (that.startButton) {
 						that.startGame();
 					} else if (that.resumeButton) {
@@ -1155,7 +1163,7 @@ BlockDropGame.prototype.setupEventListeners = function()
 					if (that.quitButton) { that.finishGame(true); }
 					event.preventDefault();
 					break;
-				case 27:	// esc key
+				case 27:	// Esc key
 				case 88:	// 'x' key
 					if (that.infoDialog) {
 						that.hideDialog("info");
@@ -1179,12 +1187,13 @@ BlockDropGame.prototype.setupEventListeners = function()
 		}
 	});
 	
+	// Need to setup the keyboard listeners on the window rather than the game wrapper
 	window.addEventListener("keyup", function(event)
 	{
 		var keyPressed = event.KeyCode || event.which;
 		
 		if (keyPressed === 18) {
-			// alt key released, undo highlight first letter of buttons
+			// Alt key released, undo highlight first letter of buttons
 			var buttons = that.gameWrapper.parentNode.getElementsByClassName("button");
 			for (var i = 0; i < buttons.length; i++) {
 				if (buttons[i] !== that.soundToggleButton && buttons[i] !== that.musicToggleButton) {
@@ -1197,12 +1206,12 @@ BlockDropGame.prototype.setupEventListeners = function()
 	
 	wrapperElement.addEventListener("touchstart", function(event)
 	{
-		// don't detect touch unless the game is playing
+		// Don't detect touch unless the game is playing
 		if (!that.isPlaying) {
 			return;
 		}
 		
-		// set the location for the start of the touch
+		// Set the location for the start of the touch
 		that.touchStartX = event.changedTouches[0].clientX;
 		that.touchStartY = event.changedTouches[0].clientY;
 		that.touchMoved = false;
@@ -1211,7 +1220,7 @@ BlockDropGame.prototype.setupEventListeners = function()
 	
 	wrapperElement.addEventListener("touchend", function(event)
 	{
-		// don't detect touch unless the game is playing
+		// Don't detect touch unless the game is playing
 		if (!that.isPlaying) {
 			return;
 		}
@@ -1228,42 +1237,43 @@ BlockDropGame.prototype.setupEventListeners = function()
 	
 	wrapperElement.addEventListener("touchmove", function(event)
 	{
+		// Don't detect touch unless the game is playing and touch isn't blocked
 		if (!that.isPlaying || that.touchBlocked) {
 			return;
 		}
 
-		// calculate the move
+		// Calculate the move
 		var touchEndX = event.changedTouches[0].clientX;
 		var touchEndY = event.changedTouches[0].clientY;
 		var touchMoveX = touchEndX - that.touchStartX;
 		var touchMoveY = touchEndY - that.touchStartY;
-		var touchBlockTime = null; // want slower movements sideways than downwards
+		var touchBlockTime = null; // Decrease how often we listen to the touchmove event
 		
-		// lets check what kind of movement
+		// Detect which direction the touch movement was in
 		if (Math.abs(touchMoveX) > Math.abs(touchMoveY) && that.touchMoved !== 'y') {
-			// horizontal swipe
+			// Horizontal swipe
 			that.touchMoved = 'x';
 			if (touchMoveX > 0) {
-				// right swipe
+				// Right swipe
 				that.moveRightHandler();
 			} else {
-				// left swipe
+				// Left swipe
 				that.moveLeftHandler();
 			}
-			touchBlockTime = 40;
-			event.preventDefault(); // allow to swipe and hold down
+			touchBlockTime = 50;
+			event.preventDefault(); // Allow to swipe and hold down
 		} else if (Math.abs(touchMoveX) <= Math.abs(touchMoveY) && that.touchMoved !== 'x') {
-			// vertical swipe
+			// Vertical swipe
 			if (touchMoveY > 0) {
-				// down swipe
+				// Down swipe
 				that.touchMoved = 'y';
 				that.moveDownHandler();
-				event.preventDefault(); // allow to swipe and hold down
+				event.preventDefault(); // Allow to swipe and hold down
 			} else if (!that.touchMoved) {
-				// up swipe
+				// Up swipe, don't use event.preventDefault 
 				that.rotateHandler();
 			}
-			touchBlockTime = 5;
+			touchBlockTime = 3;
 		}
 		
 		that.touchBlocked = true;
@@ -1274,7 +1284,7 @@ BlockDropGame.prototype.setupEventListeners = function()
 };
 
 var PieceFactory = {
-	// Define our pieces here
+	// Define all game pieces and each rotation step
 	pieces: [
 		{ id: "o", size: 2, blocks: { // O/square piece
 			rot0: [{ left: 0, top: 0 }, { left: 1, top: 0 }, { left: 0, top: 1 }, { left: 1, top: 1 }],
@@ -1347,7 +1357,6 @@ var PieceFactory = {
 		newPiece.pieceIndex = pieceIndex;
 		
 		// Size of the new piece
-		// positioning not handled here anymore, caller sets position
 		newPiece.style.width = newPiece.size + "em";
 		newPiece.style.height = newPiece.size + "em";
 		

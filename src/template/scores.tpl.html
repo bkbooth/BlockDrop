@@ -1,0 +1,18 @@
+<table>
+    <thead>
+    <tr>
+        <th></th>
+        <th>Score</th>
+        <th>Player</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{ repeat scores as score }}
+    <tr>
+        <th>{{ score.$index }}</th>
+        <td>{{ score.score }}</td>
+        <td>{{ score.name }}</td>
+    </tr>
+    {{ endrepeat }}
+    </tbody>
+</table>

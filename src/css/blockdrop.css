@@ -1,3 +1,9 @@
+/*
+ * BlockDrop - A shameless Tetris clone
+ * Styles
+ * Ben Booth
+ * bkbooth at gmail dot com
+ */
 
 body {
 	margin: 0;
@@ -76,6 +82,7 @@ body {
 }
 
 .button {
+    display: block;
 	position: absolute;
 	cursor: pointer;
 

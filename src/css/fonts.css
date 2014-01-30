@@ -1,0 +1,33 @@
+/*
+ * BlockDrop - A shameless Tetris clone
+ * Font declarations
+ * Ben Booth
+ * bkbooth at gmail dot com
+ */
+
+/* Roboto Thin */
+@font-face {
+    font-family: 'Roboto';
+    font-weight: 100;
+    font-style: normal;
+    src: local('Roboto Thin'), local('Roboto-Thin'),
+        url('../fonts/Roboto-Thin-webfont.woff') format('woff');
+}
+
+/* Roboto Regular */
+@font-face {
+    font-family: 'Roboto';
+    font-weight: normal; /* 400 */
+    font-style: normal;
+    src: local('Roboto Regular'), local('Roboto-Regular'),
+        url('../fonts/Roboto-Regular-webfont.woff') format('woff');
+}
+
+/* Roboto Black */
+@font-face {
+    font-family: 'Roboto';
+    font-weight: 900;
+    font-style: normal;
+    src: local('Roboto Black'), local('Roboto-Black'),
+        url('../fonts/Roboto-Black-webfont.woff') format('woff');
+}

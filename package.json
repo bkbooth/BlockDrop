@@ -1,0 +1,43 @@
+{
+  "name": "BlockDrop",
+  "version": "1.0.0",
+  "description": "A shameless Tetris clone using HTML/CSS/JavaScript",
+  "homepage": "https://github.com/bkbooth/BlockDrop",
+  "author": {
+    "name": "Ben Booth",
+    "email": "bkbooth@gmail.com",
+    "url": "http://bkbooth.com.au"
+  },
+  "keywords": [
+    "Tetris",
+    "game"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:bkbooth/BlockDrop.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bkbooth/BlockDrop/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-jshint": "~0.8.0",
+    "grunt-usemin": "~2.0.2",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-manifest": "~0.4.0",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-cssmin": "~0.7.0",
+    "grunt-contrib-uglify": "~0.2.7",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-rev": "~0.1.0"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "grunt --verbose",
+    "postinstall": "bower install"
+  }
+}

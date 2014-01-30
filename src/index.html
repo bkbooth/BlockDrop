@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html manifest="manifest.appcache">
+	<head>
+		<title>BlockDrop</title>
+		<link rel="shortcut icon" type="image/png" href="favicon.png" />
+
+        <!-- build:css css/vendor.min.css -->
+        <link rel="stylesheet" type="text/css" href="components/font-awesome/css/font-awesome.css" />
+        <!-- endbuild -->
+
+        <!-- build:css css/blockdrop.min.css -->
+        <link rel="stylesheet" type="text/css" href="css/fonts.css" />
+        <link rel="stylesheet" type="text/css" href="css/blockdrop.css" />
+        <!-- endbuild -->
+	</head>
+	<body>
+		<div id="game-target">
+			<!-- Game will be loaded here -->
+		</div>
+
+        <!-- build:js js/blockdrop.min.js -->
+        <script src="js/blockdrop.js"></script>
+        <script src="js/blockdrop.utils.js"></script>
+        <script src="js/blockdrop.audio-library.js"></script>
+        <script src="js/blockdrop.template-engine.js"></script>
+        <script src="js/blockdrop.game.settings.js"></script>
+        <script src="js/blockdrop.game.score.js"></script>
+        <script src="js/blockdrop.game.high-scores.js"></script>
+        <script src="js/blockdrop.game.piece-factory.js"></script>
+        <script src="js/blockdrop.game.ui.js"></script>
+        <script src="js/blockdrop.game.collision-detection.js"></script>
+        <script src="js/blockdrop.game.input.js"></script>
+        <script src="js/blockdrop.game.js"></script>
+        <!-- endbuild -->
+
+		<script defer>
+			var Tetris = new BlockDrop({
+                base: '#game-target'
+            });
+		</script>
+	</body>
+</html>

@@ -15,6 +15,7 @@ var BlockDrop = BlockDrop || function(opts) {
         UI = BlockDrop.Game.UI,
         Input = BlockDrop.Game.Input,
         HighScores = BlockDrop.Game.HighScores,
+        Settings = BlockDrop.Game.Settings,
         AudioLibrary = BlockDrop.AudioLibrary;
 
     var options = {
@@ -32,6 +33,8 @@ var BlockDrop = BlockDrop || function(opts) {
     AudioLibrary.load("drop", "audio/drop.wav");
     AudioLibrary.load("rotate", "audio/rotate.wav");
     AudioLibrary.load("music", "audio/Havok.ogg", true);
+    if (Settings.get("music")) { AudioLibrary.play("music"); }
+
     HighScores.load();
     UI.initialise(baseElement);
     Input.setupEventListeners();

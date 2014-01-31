@@ -65,6 +65,7 @@ BlockDrop.Game = (function (Game) {
      */
     var finish = function(options) {
         playing = false;
+        UI.clearGameBoard();
 
         if (options && options.quit) {
             UI.show("menu");

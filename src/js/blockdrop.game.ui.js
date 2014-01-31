@@ -293,7 +293,6 @@ BlockDrop.Game.UI = (function(UI) {
                 showElement(getElement("buttons.quit"), gameBoard);
                 break;
             case "finish":
-                clearGameBoard();
                 setElement("dialogs.finish", TemplateEngine.get("template/dialog.tpl.html", {
                     name: "finish",
                     title: "Game Over!",
@@ -546,6 +545,7 @@ BlockDrop.Game.UI = (function(UI) {
     UI.addCurrentPieceToBoard = addCurrentPieceToBoard;
     UI.findCompleteRows = findCompleteRows;
     UI.clearCompleteRow = clearCompleteRow;
+    UI.clearGameBoard = clearGameBoard;
 
     return UI;
 

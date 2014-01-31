@@ -272,7 +272,7 @@ BlockDrop.Game.Input = (function(Input) {
         } else if (!Game.isPlaying()) {
             // Game is not playing
             switch (key) {
-//                case 13:	// Enter key
+                case 13:	// Enter key
                 case 32:	// Space key
                     if (UI.isVisible(buttonStart)) {
                         Game.start();

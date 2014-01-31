@@ -91,7 +91,6 @@ BlockDrop.Game = (function (Game) {
             if (!Input.isHardDrop() && Settings.get("sound")) {
                 AudioLibrary.play("drop");
             }
-            Input.resetHardDrop();
 
             clearTimer();
 
@@ -113,7 +112,9 @@ BlockDrop.Game = (function (Game) {
                 }
             }
 
-            piece = UI.loadNextPiece();
+            UI.loadNextPiece();
+            Score.resetDropLength();
+            Input.resetHardDrop();
 
             if (CollisionDetection.isGameOver()) {
                 finish({ quit: false });

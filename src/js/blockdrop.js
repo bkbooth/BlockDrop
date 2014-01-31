@@ -30,8 +30,11 @@ var BlockDrop = BlockDrop || function(opts) {
         throw new Error("Could not find base element: " + options.base);
     }
 
+    AudioLibrary.load("move", "audio/blip.wav");
     AudioLibrary.load("drop", "audio/drop.wav");
     AudioLibrary.load("rotate", "audio/rotate.wav");
+    AudioLibrary.load("clear", "audio/clear.wav");
+    AudioLibrary.load("tetris", "audio/tetris.wav");
     AudioLibrary.load("music", "audio/Havok.ogg", true);
     if (Settings.get("music")) { AudioLibrary.play("music"); }
 

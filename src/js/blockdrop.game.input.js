@@ -34,6 +34,12 @@ BlockDrop.Game.Input = (function(Input) {
     var moveLeftHandler = function() {
         var piece = UI.getElement("pieces.current");
         if (CollisionDetection.canMoveLeft(piece)) {
+            // Stop before playing move sound again
+            if (Settings.get("sound")) {
+                AudioLibrary.stop("move");
+                AudioLibrary.play("move");
+            }
+
             UI.moveLeft(piece);
         }
     };
@@ -44,6 +50,12 @@ BlockDrop.Game.Input = (function(Input) {
     var moveRightHandler = function() {
         var piece = UI.getElement("pieces.current");
         if (CollisionDetection.canMoveRight(piece)) {
+            // Stop before playing move sound again
+            if (Settings.get("sound")) {
+                AudioLibrary.stop("move");
+                AudioLibrary.play("move");
+            }
+
             UI.moveRight(piece);
         }
     };
@@ -57,6 +69,12 @@ BlockDrop.Game.Input = (function(Input) {
         Game.clearTimer();
 
         if (CollisionDetection.canMoveDown(piece)) {
+            // Stop before playing move sound again
+            if (Settings.get("sound")) {
+                AudioLibrary.stop("move");
+                AudioLibrary.play("move");
+            }
+
             UI.moveDown(piece);
             Score.incrementDrop();
         } else {

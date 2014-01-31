@@ -99,6 +99,14 @@ BlockDrop.Game = (function (Game) {
             completeRows = UI.findCompleteRows();
             Score.incrementScore(completeRows.length);
 
+            if (completeRows.length && Settings.get("sound")) {
+                if (completeRows.length === 4) {
+                    AudioLibrary.play("tetris");
+                } else {
+                    AudioLibrary.play("clear");
+                }
+            }
+
             for (i = completeRows.length; i > 0; i--) {
                 // Starting from the end of the array (highest complete row)
                 // because when you clear the lower rows first the value

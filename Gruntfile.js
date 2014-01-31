@@ -129,6 +129,32 @@ module.exports = function(grunt) {
                 ],
                 dest: '<%= blockdrop.dist %>/manifest.appcache'
             }
+        },
+        gitcheckout: {
+            release: {
+                options: {
+                    branch: 'gh-pages',
+                    create: false
+                }
+            }
+        },
+        gitreset: {
+            release: {
+                options: {
+                    mode: 'hard',
+                    commit: 'master'
+                }
+            }
+        },
+        gitcommit: {
+            release: {
+                options: {
+                    message: 'Build'
+                },
+                files: {
+                    src: ['.']
+                }
+            }
         }
     });
 
@@ -142,6 +168,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-rev');
     grunt.loadNpmTasks('grunt-usemin');
     grunt.loadNpmTasks('grunt-manifest');
+    grunt.loadNpmTasks('grunt-git');
 
     grunt.registerTask('build', [
         'clean',
@@ -157,10 +184,13 @@ module.exports = function(grunt) {
     ]);
 
     grunt.registerTask('release', [
+        'gitcheckout:release',
+        'gitreset:release',
         'default',
         'clean:release',
         'copy:release',
-        'clean:dist'
+        'clean:dist',
+        'gitcommit:release'
     ]);
 
     // Defualt task, just run 'grunt'

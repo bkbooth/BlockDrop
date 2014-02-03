@@ -42,7 +42,7 @@ BlockDrop.Game.UI = (function(UI) {
             // Extra vertical space
             baseSize = Math.floor(window.innerWidth / gameWidth);
         }
-        document.querySelector("body").style.fontSize = baseSize + "px";
+        target.style.fontSize = baseSize + "px";
 
         // Load the game board from template
         target.appendChild( TemplateEngine.get("template/board.tpl.html", {
@@ -260,7 +260,7 @@ BlockDrop.Game.UI = (function(UI) {
      */
     var show = function(name) {
         var gameBoard = getElement("wrappers.game"),
-            gameWrapper = gameBoard.parentNode,
+            gameWrapper = gameBoard.parentElement,
             infoWrapper = getElement("wrappers.info"),
             inputName;
 
@@ -425,7 +425,7 @@ BlockDrop.Game.UI = (function(UI) {
 
         // Now lets go through and remove all the blocks in the row
         for (i = 0; i < blocksToRemove.length; i++) {
-            blocksToRemove[i].parentNode.removeChild(blocksToRemove[i]);
+            blocksToRemove[i].parentElement.removeChild(blocksToRemove[i]);
         }
     };
 
@@ -442,7 +442,7 @@ BlockDrop.Game.UI = (function(UI) {
             i, n;
 
         for (i = 0, n = allBlocks.length; i < n; i++) {
-            if (allBlocks[i].parentNode !== currentPiece) {
+            if (allBlocks[i].parentElement !== currentPiece) {
                 gameBoard.removeChild(allBlocks[i]);
             }
         }
@@ -461,7 +461,7 @@ BlockDrop.Game.UI = (function(UI) {
      */
     var hideElement = function(element) {
         element.dataset.visible = "false";
-        return element.parentNode.removeChild(element);
+        return element.parentElement.removeChild(element);
     };
 
     /**

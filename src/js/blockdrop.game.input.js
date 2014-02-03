@@ -179,12 +179,12 @@ BlockDrop.Game.Input = (function(Input) {
             // Quit the game
             Game.finish({ quit: true });
             event.preventDefault();
-        } else if (event.target === buttonSound || event.target.parentNode === buttonSound) {
+        } else if (event.target === buttonSound || event.target.parentElement === buttonSound) {
             // Toggle the sound button
             newVal = Settings.toggle("sound");
             Utils.setIntData(buttonSound, "on", newVal);
             event.preventDefault();
-        } else if (event.target === buttonMusic || event.target.parentNode === buttonMusic) {
+        } else if (event.target === buttonMusic || event.target.parentElement === buttonMusic) {
             // Toggle the music button, start/stop the music
             newVal = Settings.toggle("music");
             Utils.setIntData(buttonMusic, "on", newVal);
@@ -210,7 +210,7 @@ BlockDrop.Game.Input = (function(Input) {
      * @param {KeyboardEvent} event
      */
     var keyDownListener = function(event) {
-        var gameWrapper = UI.getElement("wrappers.game").parentNode,
+        var gameWrapper = UI.getElement("wrappers.game").parentElement,
             buttonStart = UI.getElement("buttons.start"),
             buttonAbout = UI.getElement("buttons.about"),
             buttonScores = UI.getElement("buttons.scores"),
@@ -354,7 +354,7 @@ BlockDrop.Game.Input = (function(Input) {
      * @param {KeyboardEvent} event
      */
     var keyUpListener = function(event) {
-        var gameWrapper = UI.getElement("wrappers.game").parentNode,
+        var gameWrapper = UI.getElement("wrappers.game").parentElement,
             buttonSound = UI.getElement("buttons.sound"),
             buttonMusic = UI.getElement("buttons.music"),
             key = event.keyCode || event.which,
@@ -408,8 +408,8 @@ BlockDrop.Game.Input = (function(Input) {
         // event.preventDefault on the "touchmove" handler causes the "touchend" event to still fire
         // so we need to detect if we've moved the piece during the touch event cycle
         if (!touchMoved && event.target !== buttonPause &&
-            event.target !== buttonSound && event.target.parentNode !== buttonSound &&
-            event.target !== buttonSound && event.target.parentNode !== buttonMusic) {
+            event.target !== buttonSound && event.target.parentElement !== buttonSound &&
+            event.target !== buttonSound && event.target.parentElement !== buttonMusic) {
             rotateHandler();
             event.preventDefault();
         }
@@ -470,7 +470,7 @@ BlockDrop.Game.Input = (function(Input) {
      * Setup the event listeners
      */
     var setupEventListeners = function() {
-        var gameWrapper = UI.getElement("wrappers.game").parentNode;
+        var gameWrapper = UI.getElement("wrappers.game").parentElement;
 
         // Mouse listener
         gameWrapper.addEventListener("click", clickListener);

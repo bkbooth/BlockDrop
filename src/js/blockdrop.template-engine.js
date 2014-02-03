@@ -107,8 +107,7 @@ BlockDrop.TemplateEngine = (function (TemplateEngine) {
      * @returns {HTMLElement} DOM node
      */
     var parse = function(templateString) {
-        var temp = parser.parseFromString(templateString, "text/html").querySelector("body").childNodes[0];
-        return temp;
+        return parser.parseFromString(templateString, "text/html").querySelector("body").children[0];
     };
 
     /**

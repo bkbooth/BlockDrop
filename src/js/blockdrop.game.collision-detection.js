@@ -238,7 +238,7 @@ BlockDrop.Game.CollisionDetection = (function(CollisionDetection) {
         // Loop through all blocks on the game board
         for (i = 0, n = allBlocks.length; i < n; i++) {
             // Ignore blocks from the passed in object and the current piece
-            if (allBlocks[i].parentNode !== element && allBlocks[i].parentNode !== piece) {
+            if (allBlocks[i].parentElement !== element && allBlocks[i].parentElement !== piece) {
                 // Loop through all blocks of the current piece
                 for (j = 0, m = objectBlocks.length; j < m; j++) {
                     // Do a simple box collision check

@@ -13,8 +13,7 @@ BlockDrop.TemplateEngine = (function (TemplateEngine) {
 
     // Dependencies
     var Utils = BlockDrop.Utils,
-        xhr = new XMLHttpRequest(),
-        parser = new DOMParser();
+        xhr = new XMLHttpRequest();
 
     // Local variables
     var cache = JSON.parse(localStorage.getItem("BlockDrop.cache.template")) || {};
@@ -107,7 +106,9 @@ BlockDrop.TemplateEngine = (function (TemplateEngine) {
      * @returns {HTMLElement} DOM node
      */
     var parse = function(templateString) {
-        return parser.parseFromString(templateString, "text/html").querySelector("body").children[0];
+        var doc = document.implementation.createHTMLDocument("");
+        doc.body.innerHTML = templateString;
+        return doc.querySelector("body").children[0];
     };
 
     /**

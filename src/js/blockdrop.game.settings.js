@@ -12,8 +12,7 @@ BlockDrop.Game.Settings = (function(Settings) {
     console.log("BlockDrop.Game.Settings");
 
     // Dependencies
-    var Utils = BlockDrop.Utils,
-        AudioLibrary = BlockDrop.AudioLibrary;
+    var Utils = BlockDrop.Utils;
 
     // Local variables
     var settings = {
@@ -40,22 +39,14 @@ BlockDrop.Game.Settings = (function(Settings) {
      * Set a stored setting value
      *
      * @param {String} setting
-     *
      * @param {*} value
+     *
+     * @returns {*}
      */
     var set = function(setting, value) {
         settings[setting] = value;
-
-        // Start or stop the music if necessary
-        if (setting === "music") {
-            if (value === true) {
-                AudioLibrary.play("music");
-            } else {
-                AudioLibrary.pause("music");
-            }
-        }
-
         localStorage.setItem("BlockDrop.settings." + setting, value);
+        return settings[setting];
     };
 
     /**

@@ -150,9 +150,6 @@ BlockDrop.Game.Input = (function(Input) {
             buttonQuit = UI.getElement("buttons.quit"),
             buttonSound = UI.getElement("buttons.sound"),
             buttonMusic = UI.getElement("buttons.music"),
-            dialogInfo = UI.getElement("dialogs.info"),
-            dialogFinish = UI.getElement("dialogs.finish"),
-            dialogScores = UI.getElement("dialogs.scores"),
             newVal;
 
         if (event.target === buttonStart) {
@@ -188,17 +185,15 @@ BlockDrop.Game.Input = (function(Input) {
             // Toggle the music button, start/stop the music
             newVal = Settings.toggle("music");
             Utils.setIntData(buttonMusic, "on", newVal);
+            if (newVal) {
+                AudioLibrary.play("music");
+            } else {
+                AudioLibrary.pause("music");
+            }
             event.preventDefault();
-        } else if (UI.isVisible(dialogInfo) && event.target === dialogInfo.querySelector(".close-button")) {
-            // Hide the info dialog, show the start, about and scores buttons
-            UI.show("menu");
-            event.preventDefault();
-        } else if (UI.isVisible(dialogFinish) && event.target === dialogFinish.querySelector(".close-button")) {
-            // Hide the finish dialog, show the start, about and scores buttons
-            UI.show("menu");
-            event.preventDefault();
-        } else if (UI.isVisible(dialogScores) && event.target === dialogScores.querySelector(".close-button")) {
-            // Hide the high scores dialog, show the start, about and scores buttons
+        } else if (event.target.classList.contains("close-button") ||
+            event.target.parentElement.classList.contains("close-button")) {
+            // Show the main menu
             UI.show("menu");
             event.preventDefault();
         }
@@ -335,11 +330,7 @@ BlockDrop.Game.Input = (function(Input) {
                     break;
                 case 27:	// Esc key
                 case 88:	// 'x' key
-                    if (UI.isVisible(dialogInfo)) {
-                        UI.show("menu");
-                    } else if (UI.isVisible(dialogFinish)) {
-                        UI.show("menu");
-                    } else if (UI.isVisible(dialogScores)) {
+                    if (UI.isVisible(dialogInfo) || UI.isVisible(dialogFinish) || UI.isVisible(dialogScores)) {
                         UI.show("menu");
                     }
                     event.preventDefault();

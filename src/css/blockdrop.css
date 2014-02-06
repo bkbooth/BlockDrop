@@ -222,21 +222,23 @@ body {
 	top: 0.25em;
 	cursor: pointer;
 	
-	width: 0.8em;
-	height: 0.8em;
-	line-height: 0.6em;
-	
+	width: 1em;
+	height: 1em;
+	line-height: 0.8em;
 	text-align: center;
-	font-weight: 400;
-	
+
 	background: #ca4242;
 	color: white;
-	border-radius: 0.1em;
+	border-radius: 0.2em;
 	z-index: 101;
 }
 .dialog .close-button:hover {
 	background: #b03a3a;
 }
+.dialog .close-button i {
+    font-size: 0.8em;
+}
+
 span.key {
 	display: inline-block;
 	background: #999;

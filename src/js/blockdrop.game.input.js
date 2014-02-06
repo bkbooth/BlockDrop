@@ -369,8 +369,14 @@ BlockDrop.Game.Input = (function(Input) {
      * @param {TouchEvent|Event} event
      */
     var touchStartListener = function(event) {
+        var buttonPause = UI.getElement("buttons.pause"),
+            buttonSound = UI.getElement("buttons.sound"),
+            buttonMusic = UI.getElement("buttons.music");
+
         // Don't detect touch unless the game is playing
-        if (!Game.isPlaying()) {
+        if (!Game.isPlaying() || event.target === buttonPause ||
+            event.target === buttonSound || event.target.parentElement === buttonSound ||
+            event.target === buttonMusic || event.target.parentElement === buttonMusic) {
             return;
         }
 
@@ -387,20 +393,20 @@ BlockDrop.Game.Input = (function(Input) {
      * @param {TouchEvent|Event} event
      */
     var touchEndListener = function(event) {
-        // Don't detect touch unless the game is playing
-        if (!Game.isPlaying()) {
-            return;
-        }
-
         var buttonPause = UI.getElement("buttons.pause"),
             buttonSound = UI.getElement("buttons.sound"),
             buttonMusic = UI.getElement("buttons.music");
 
+        // Don't detect touch unless the game is playing
+        if (!Game.isPlaying() || event.target === buttonPause ||
+            event.target === buttonSound || event.target.parentElement === buttonSound ||
+            event.target === buttonMusic || event.target.parentElement === buttonMusic) {
+            return;
+        }
+
         // event.preventDefault on the "touchmove" handler causes the "touchend" event to still fire
         // so we need to detect if we've moved the piece during the touch event cycle
-        if (!touchMoved && event.target !== buttonPause &&
-            event.target !== buttonSound && event.target.parentElement !== buttonSound &&
-            event.target !== buttonSound && event.target.parentElement !== buttonMusic) {
+        if (!touchMoved) {
             rotateHandler();
             event.preventDefault();
         }

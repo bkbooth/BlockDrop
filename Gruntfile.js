@@ -122,7 +122,7 @@ module.exports = function(grunt) {
                     verbose: false,
                     timestamp: true,
                     hash: true, // NOT WORKING?
-                    master: ['index.html']
+                    master: ['<%= blockdrop.dist %>/index.html']
                 },
                 src: [
                     'index.html',
@@ -134,6 +134,21 @@ module.exports = function(grunt) {
                     'template/*'
                 ],
                 dest: '<%= blockdrop.dist %>/manifest.appcache'
+            }
+        },
+        replace: {
+            dist: {
+                options: {
+                    patterns: [{
+                        match: /<(html)>/img,
+                        replacement: '<$1 manifest="manifest.appcache">',
+                        expression: true
+                    }]
+                },
+                files: [{
+                    src: ['<%= blockdrop.dist %>/index.html'],
+                    dest: '<%= blockdrop.dist %>/index.html'
+                }]
             }
         }
     });
@@ -148,6 +163,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-rev');
     grunt.loadNpmTasks('grunt-usemin');
     grunt.loadNpmTasks('grunt-manifest');
+    grunt.loadNpmTasks('grunt-replace');
 
     grunt.registerTask('build', [
         'clean',
@@ -159,6 +175,7 @@ module.exports = function(grunt) {
         'rev',
         'usemin',
         'manifest',
+        'replace',
         'clean:build'
     ]);
 

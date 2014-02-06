@@ -13,11 +13,6 @@
         <link rel="stylesheet" type="text/css" href="css/fonts.css" />
         <link rel="stylesheet" type="text/css" href="css/blockdrop.css" />
         <!-- endbuild -->
-	</head>
-	<body>
-		<div id="game-target">
-			<!-- Game will be loaded here -->
-		</div>
 
         <!-- build:js js/blockdrop.min.js -->
         <script src="js/blockdrop.js"></script>
@@ -33,10 +28,17 @@
         <script src="js/blockdrop.game.input.js"></script>
         <script src="js/blockdrop.game.js"></script>
         <!-- endbuild -->
+	</head>
+	<body>
+		<div id="game-target">
+			<!-- Game will be loaded here -->
+		</div>
 
-		<script defer>
-			var Tetris = new BlockDrop({
-                base: '#game-target'
+		<script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var Tetris = new BlockDrop({
+                    base: "#game-target"
+                });
             });
 		</script>
 	</body>

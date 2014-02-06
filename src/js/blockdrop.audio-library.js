@@ -19,11 +19,16 @@ BlockDrop.AudioLibrary = (function(AudioLibrary) {
      *
      * @param {String} audio - Easy to remember name of the audio file for later use
      * @param {String} fileName - Actual filename of the audio file
-     * @param {Boolean} [loop] - Enable looping for the audio
+     * @param {Object} [options]
+     * @param {Boolean} [options.loop] - Enable looping for the audio
+     * @param {Boolean} [options.play] - Play the audio immediately?
      */
-    var load = function(audio, fileName, loop) {
+    var load = function(audio, fileName, options) {
         library[audio] = new Audio(fileName);
-        library[audio].loop = !!loop;
+        library[audio].loop = options && !!options.loop;
+        if (options && !!options.play) {
+            library[audio].play();
+        }
     };
 
     /**

@@ -15,13 +15,14 @@ BlockDrop.Game.Settings = (function(Settings) {
     var Utils = BlockDrop.Utils;
 
     // Local variables
-    var settings = {
-        music: localStorage.getItem("BlockDrop.settings.music") ?
-            Utils.parseBool(localStorage.getItem("BlockDrop.settings.music")) :
-            localStorage.setItem("BlockDrop.settings.music", true),
-        sound: localStorage.getItem("BlockDrop.settings.sound") ?
-            Utils.parseBool(localStorage.getItem("BlockDrop.settings.sound")) :
-            localStorage.setItem("BlockDrop.settings.sound", true)
+    var settings = {};
+
+    var initialise = function() {
+        var music = localStorage.getItem("BlockDrop.settings.music"),
+            sound = localStorage.getItem("BlockDrop.settings.sound");
+
+        settings.music = music ? Utils.parseBool(music) : set("music", true);
+        settings.sound = sound ? Utils.parseBool(sound) : set("sound", true);
     };
 
     /**
@@ -62,6 +63,7 @@ BlockDrop.Game.Settings = (function(Settings) {
     };
 
     // Public interface
+    Settings.initialise = initialise;
     Settings.get = get;
     Settings.set = set;
     Settings.toggle = toggle;

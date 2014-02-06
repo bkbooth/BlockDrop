@@ -60,7 +60,9 @@ module.exports = function(grunt) {
                 files: {
                     src: [
                         '<%= blockdrop.dist %>/js/*.js',
-                        '<%= blockdrop.dist %>/css/*.css'
+                        '<%= blockdrop.dist %>/css/*.css',
+                        '<%= blockdrop.dist %>/template/*',
+                        '<%= blockdrop.dist %>/audio/*'
                     ]
                 }
             }
@@ -73,10 +75,14 @@ module.exports = function(grunt) {
         },
         usemin: {
             options: {
-                dirs: ['<%= blockdrop.dist %>']
+                assetsDirs: ['<%= blockdrop.dist %>'],
+                patterns: {
+                    js: [[/"([a-z0-9_\-\\\/]+\.(?:wav|ogg|tpl\.html))"/img, 'Replacing audio and template html references']]
+                }
             },
             html: ['<%= blockdrop.dist %>/index.html'],
-            css: ['<%= blockdrop.dist %>/css/*.css']
+            css: ['<%= blockdrop.dist %>/css/*.css'],
+            js: ['<%= blockdrop.dist %>/js/*.js']
         },
         copy: {
             dist: {
@@ -87,7 +93,7 @@ module.exports = function(grunt) {
                     src: [
                         '*.{html,png}',
                         'audio/*',
-                        'fonts/*',
+                        'fonts/*.woff',
                         'template/*'
                     ]
                 }, {

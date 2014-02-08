@@ -8,6 +8,9 @@
 body {
 	margin: 0;
 	padding: 0;
+
+    width: 100%;
+    height: 100%;
 	
 	background: #333;
 	font-family: 'Roboto', sans-serif;
@@ -17,6 +20,26 @@ body {
 	 * updating the body font size in em's
 	 */
 	font-size: 10px;
+}
+
+#loading {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 999;
+
+    width: 100%;
+    height: 100%;
+    background: #333;
+    color: #428bca;
+    font-size: 5em;
+}
+#loading i {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -0.5em;
+    margin-top: -0.5em;
 }
 
 #game-wrapper {

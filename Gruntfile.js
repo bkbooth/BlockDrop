@@ -143,11 +143,20 @@ module.exports = function(grunt) {
                         match: /<(html)>/img,
                         replacement: '<$1 manifest="manifest.appcache">',
                         expression: true
+                    }, {
+                        match: /([\?&]v=[0-9.]+)/img,
+                        replacement: '',
+                        expression: true
                     }]
                 },
                 files: [{
                     src: ['<%= blockdrop.dist %>/index.html'],
                     dest: '<%= blockdrop.dist %>/index.html'
+                }, {
+                    expand: true,
+                    flatten: true,
+                    src: ['<%= blockdrop.dist %>/css/*'],
+                    dest: '<%= blockdrop.dist %>/css/'
                 }]
             }
         }

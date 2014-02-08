@@ -34,12 +34,49 @@
 			<!-- Game will be loaded here -->
 		</div>
 
+        <div id="loading">
+            <i class="fa fa-fw fa-5x fa-spin fa-cog"></i>
+        </div>
+
 		<script>
+            var loading = document.getElementById("loading"),
+                appCache = window.applicationCache;
+
+            var ready = function() {
+                setTimeout(function() {
+                    loading.parentElement.removeChild(loading);
+
+                    var Tetris = new BlockDrop({
+                        base: "#game-target"
+                    });
+                }, 1000);
+            };
+
             document.addEventListener("DOMContentLoaded", function() {
-                var Tetris = new BlockDrop({
-                    base: "#game-target"
-                });
+                // keep waiting for appCache events if appCache being used
+                if( !appCache.status ) {
+                    console.log("no appCache");
+                    ready();
+                }
             });
+
+            if( appCache.status === appCache.IDLE) {
+                console.log("appCache already loaded");
+                ready();
+            } else {
+                appCache.addEventListener("cached", function() {
+                    console.log("appCache cached");
+                    ready();
+                });
+                appCache.addEventListener("updateready", function() {
+                    console.log("appCache updateready");
+                    ready();
+                });
+                appCache.addEventListener("noupdate", function() {
+                    console.log("appCache noupdate");
+                    ready();
+                });
+            }
 		</script>
 	</body>
 </html>

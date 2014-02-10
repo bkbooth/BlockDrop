@@ -36,45 +36,41 @@
 
         <div id="loading">
             <i class="fa fa-fw fa-5x fa-spin fa-cog"></i>
+            <progress id="progress" value="10" max="100"></progress>
         </div>
 
 		<script>
             var loading = document.getElementById("loading"),
+                progress = document.getElementById("progress"),
                 appCache = window.applicationCache;
 
             var ready = function() {
+                progress.value = 100;
                 setTimeout(function() {
                     loading.parentElement.removeChild(loading);
 
                     var Tetris = new BlockDrop({
                         base: "#game-target"
                     });
-                }, 1000);
+                }, 500);
             };
 
             document.addEventListener("DOMContentLoaded", function() {
-                // keep waiting for appCache events if appCache being used
-                if( !appCache.status ) {
+                // keep waiting for appCache events if appCache is being used
+                if (!appCache.status ) {
                     console.log("no appCache");
                     ready();
                 }
             });
 
-            if( appCache.status === appCache.IDLE) {
-                console.log("appCache already loaded");
+            if (appCache.status === appCache.IDLE) {
                 ready();
             } else {
-                appCache.addEventListener("cached", function() {
-                    console.log("appCache cached");
-                    ready();
-                });
-                appCache.addEventListener("updateready", function() {
-                    console.log("appCache updateready");
-                    ready();
-                });
-                appCache.addEventListener("noupdate", function() {
-                    console.log("appCache noupdate");
-                    ready();
+                appCache.addEventListener("cached", ready);
+                appCache.addEventListener("updateready", ready);
+                appCache.addEventListener("noupdate", ready);
+                appCache.addEventListener("progress", function(event) {
+                    progress.value = Math.round((event.loaded / event.total) * 100);
                 });
             }
 		</script>

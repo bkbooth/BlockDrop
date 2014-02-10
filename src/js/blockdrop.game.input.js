@@ -385,6 +385,7 @@ BlockDrop.Game.Input = (function(Input) {
         touchStartY = event.changedTouches[0].clientY;
         touchMoved = false;
         touchBlocked = false;
+        event.preventDefault();
     };
 
     /**
@@ -419,48 +420,44 @@ BlockDrop.Game.Input = (function(Input) {
      */
     var touchMoveListener = function(event) {
         // Don't detect touch unless the game is playing and touch isn't blocked
-        if (!Game.isPlaying() || touchBlocked) {
+        if (!Game.isPlaying()) {
             return;
         }
 
         // Calculate the move
-        var touchEndX = event.changedTouches[0].clientX,
-            touchEndY = event.changedTouches[0].clientY,
-            touchMoveX = touchEndX - touchStartX,
-            touchMoveY = touchEndY - touchStartY,
-            touchBlockTime = null; // Decrease how often we listen to the touchmove event
+        var touchMoveX = event.changedTouches[0].clientX,
+            touchMoveY = event.changedTouches[0].clientY,
+            touchChangeX = touchMoveX - touchStartX,
+            touchChangeY = touchMoveY - touchStartY,
+            baseSize = UI.getBaseSize();
 
         // Detect which direction the touch movement was in
-        if (Math.abs(touchMoveX) > Math.abs(touchMoveY) && touchMoved !== "y") {
+        if (Math.abs(touchChangeX) > Math.abs(touchChangeY) &&
+            Math.abs(touchChangeX) >= baseSize && touchMoved[0] !== "y") {
             // Horizontal swipe
             touchMoved = "x";
-            if (touchMoveX > 0) {
-                // Right swipe
+            if (touchChangeX > 0) {
                 moveRightHandler();
             } else {
-                // Left swipe
                 moveLeftHandler();
             }
-            touchBlockTime = 50;
-            event.preventDefault(); // Allow to swipe and hold down
-        } else if (Math.abs(touchMoveX) <= Math.abs(touchMoveY) && touchMoved !== "x") {
+            touchStartX = touchMoveX;
+        } else if (Math.abs(touchChangeX) <= Math.abs(touchChangeY) &&
+            Math.abs(touchChangeY) >= baseSize) {
             // Vertical swipe
-            if (touchMoveY > 0) {
-                // Down swipe
-                touchMoved = "y";
+            if (touchChangeY >= 3 * baseSize) {
+                hardDropHandler();
+            } else if (touchChangeY > 0) {
+                touchMoved = "y+";
                 moveDownHandler();
-                event.preventDefault(); // Allow to swipe and hold down
             } else if (!touchMoved) {
-                // Up swipe, don't use event.preventDefault
+                touchMoved = "y-";
                 rotateHandler();
             }
-            touchBlockTime = 3;
+            touchStartY = touchMoveY;
         }
 
-        touchBlocked = true;
-        setTimeout(function() {
-            touchBlocked = false;
-        }, touchBlockTime);
+        event.preventDefault();
     };
 
     /**

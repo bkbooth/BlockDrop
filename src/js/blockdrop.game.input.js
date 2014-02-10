@@ -385,6 +385,7 @@ BlockDrop.Game.Input = (function(Input) {
         touchStartY = event.changedTouches[0].clientY;
         touchMoved = false;
         touchBlocked = false;
+        event.preventDefault();
     };
 
     /**
@@ -419,19 +420,23 @@ BlockDrop.Game.Input = (function(Input) {
      */
     var touchMoveListener = function(event) {
         // Don't detect touch unless the game is playing and touch isn't blocked
-        if (!Game.isPlaying() || touchBlocked) {
+        if (!Game.isPlaying()/* || touchBlocked*/) {
             return;
         }
+
+        console.log("move","x",event.changedTouches[0].clientX,"y",event.changedTouches[0].clientY);
+        event.preventDefault();
 
         // Calculate the move
         var touchEndX = event.changedTouches[0].clientX,
             touchEndY = event.changedTouches[0].clientY,
             touchMoveX = touchEndX - touchStartX,
             touchMoveY = touchEndY - touchStartY,
-            touchBlockTime = null; // Decrease how often we listen to the touchmove event
+            baseSize = UI.getBaseSize();
+//            touchBlockTime = null; // Decrease how often we listen to the touchmove event
 
         // Detect which direction the touch movement was in
-        if (Math.abs(touchMoveX) > Math.abs(touchMoveY) && touchMoved !== "y") {
+        if (Math.abs(touchMoveX) > Math.abs(touchMoveY) && touchMoveX >= baseSize && touchMoved !== "y") {
             // Horizontal swipe
             touchMoved = "x";
             if (touchMoveX > 0) {
@@ -441,26 +446,27 @@ BlockDrop.Game.Input = (function(Input) {
                 // Left swipe
                 moveLeftHandler();
             }
-            touchBlockTime = 50;
-            event.preventDefault(); // Allow to swipe and hold down
+            touchStartX += (touchMoveX - baseSize);
+//            touchBlockTime = 50;
+//            event.preventDefault(); // Allow to swipe and hold down
         } else if (Math.abs(touchMoveX) <= Math.abs(touchMoveY) && touchMoved !== "x") {
             // Vertical swipe
             if (touchMoveY > 0) {
                 // Down swipe
                 touchMoved = "y";
                 moveDownHandler();
-                event.preventDefault(); // Allow to swipe and hold down
+//                event.preventDefault(); // Allow to swipe and hold down
             } else if (!touchMoved) {
                 // Up swipe, don't use event.preventDefault
                 rotateHandler();
             }
-            touchBlockTime = 3;
+//            touchBlockTime = 3;
         }
 
-        touchBlocked = true;
+        /*touchBlocked = true;
         setTimeout(function() {
             touchBlocked = false;
-        }, touchBlockTime);
+        }, touchBlockTime);*/
     };
 
     /**

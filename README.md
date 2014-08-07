@@ -1,5 +1,7 @@
 # BlockDrop
 
+Demo here: [blockdrop.bkbooth.me](http://blockdrop.bkbooth.me/)
+
 BlockDrop is a shameless Tetris&reg; clone using pure JavaScript, HTML and CSS.
 I started writing it while teaching myself how to use JavaScript as a proper language and wean myself off jQuery.
 I'm also using it as a testing platform for various JavaScript, HTML5 and CSS3 features.

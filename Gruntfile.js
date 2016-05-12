@@ -122,7 +122,7 @@ module.exports = function(grunt) {
                     verbose: false,
                     timestamp: true,
                     hash: true, // NOT WORKING?
-                    master: ['<%= blockdrop.dist %>/index.html']
+                    master: ['/index.html']
                 },
                 src: [
                     'index.html',

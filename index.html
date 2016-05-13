@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html manifest="manifest.appcache">
+	<head>
+		<title>BlockDrop</title>
+		<link rel="shortcut icon" type="image/png" href="favicon.png" />
+        <meta name="viewport" content="user-scalable=no, initial-scale=0.1, width=device-width" />
+
+        <link rel="stylesheet" href="css/ea55a8bd.vendor.min.css">
+
+        <link rel="stylesheet" href="css/90c0e711.blockdrop.min.css">
+
+        <script src="js/4d8bdea6.blockdrop.min.js"></script>
+	</head>
+	<body>
+		<div id="game-target">
+			<!-- Game will be loaded here -->
+		</div>
+
+        <div id="loading">
+            <i class="fa fa-fw fa-5x fa-spin fa-cog"></i>
+            <progress id="progress" value="10" max="100"></progress>
+        </div>
+
+		<script>
+            var loading = document.getElementById("loading"),
+                progress = document.getElementById("progress"),
+                appCache = window.applicationCache;
+
+            var ready = function() {
+                progress.value = 100;
+                setTimeout(function() {
+                    loading.parentElement.removeChild(loading);
+
+                    var Tetris = new BlockDrop({
+                        base: "#game-target"
+                    });
+                }, 500);
+            };
+
+            document.addEventListener("DOMContentLoaded", function() {
+                // keep waiting for appCache events if appCache is being used
+                if (!appCache.status ) {
+                    console.log("no appCache");
+                    ready();
+                }
+            });
+
+            if (appCache.status === appCache.IDLE) {
+                ready();
+            } else {
+                appCache.addEventListener("cached", ready);
+                appCache.addEventListener("updateready", ready);
+                appCache.addEventListener("noupdate", ready);
+                appCache.addEventListener("progress", function(event) {
+                    progress.value = Math.round((event.loaded / event.total) * 100);
+                });
+            }
+		</script>
+	</body>
+</html>

@@ -1,6 +1,6 @@
 ## Shapes
 
-````
+```none
 xx		yellow		O/square
 xx
 
@@ -20,11 +20,12 @@ xx		red			Z
 xxx
 
 xxxx	cyan		I/long
-````
+```
 
 ## Board Size
 
 20 rows x 10 cols
 
 ## Things
-clearInterval(BlockDropGame._intervalId);
+
+`clearInterval(BlockDropGame._intervalId);`

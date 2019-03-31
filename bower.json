@@ -1,25 +1,14 @@
 {
-  "name": "BlockDrop",
+  "name": "blockdrop",
   "version": "1.0.0",
-  "homepage": "https://blockdrop.benbooth.co",
-  "authors": [
-    "Ben Booth <bkbooth@gmail.com>"
-  ],
+  "homepage": "https://blockdrop.benbooth.dev",
+  "authors": ["Ben Booth <bkbooth@gmail.com>"],
   "description": "A shameless Tetris clone using HTML/CSS/JavaScript",
   "main": "index.html",
-  "keywords": [
-    "Tetris",
-    "game"
-  ],
+  "keywords": ["Tetris", "game"],
   "license": "MIT",
   "private": true,
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "test",
-    "tests"
-  ],
+  "ignore": ["**/.*", "node_modules", "bower_components", "test", "tests"],
   "dependencies": {
     "font-awesome": "~4.0.3"
   }

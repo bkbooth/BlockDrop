@@ -1,12 +1,12 @@
 {
-  "name": "BlockDrop",
+  "name": "blockdrop",
   "version": "1.0.0",
   "description": "A shameless Tetris clone using HTML/CSS/JavaScript",
   "homepage": "https://github.com/bkbooth/BlockDrop",
   "author": {
     "name": "Ben Booth",
     "email": "bkbooth@gmail.com",
-    "url": "https://benbooth.co"
+    "url": "https://benbooth.dev"
   },
   "keywords": [
     "Tetris",
@@ -22,6 +22,7 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "bower": "^1.8.8",
     "grunt": "~0.4.5",
     "grunt-contrib-clean": "~0.6.0",
     "grunt-contrib-concat": "~0.5.1",
